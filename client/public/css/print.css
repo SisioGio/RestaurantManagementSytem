@@ -1,0 +1,14 @@
+@media print {
+    
+    h1,h2,h3,h4,h5,p,a,li,th,tr,label{
+     
+        font-family:'Times New Roman', Times, serif!important;
+       
+    }
+
+    #nav-container{
+        display: none;
+    }
+
+
+ }

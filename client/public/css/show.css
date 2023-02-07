@@ -1,0 +1,20 @@
+.form-view{
+    width: 50%;
+    background-color: rgba(255, 255, 255, 0);
+    margin: auto;
+    text-transform: uppercase;
+    color: rgb(0, 0, 0);
+    border: black 1px solid;
+}
+
+.form-view-row{
+    padding: 1rem;
+}
+.form-view-data,.form-view-header{
+    padding: 0.5rem 0.5rem;
+}
+
+.form-view h5,.form-view h4,.form-view h3{
+    color: rgb(0, 0, 0);
+}
+

@@ -1,0 +1,86 @@
+/* // X-Small devices (portrait phones, less than 576px) */
+
+#about h1 {
+  padding: 4rem 0rem;
+}
+
+#about a {
+  color: blue;
+  text-decoration: underline;
+}
+
+#about p {
+  padding: 1rem;
+  font-size: 1.25rem;
+  line-height: 2rem;
+  text-align: center;
+}
+.about-content {
+  padding: 1rem 2rem;
+}
+.about-content img {
+  width: 100%;
+}
+/* // Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+  .about-content {
+    padding: 2rem 5rem;
+  }
+}
+
+/* // Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .about-content {
+    padding: 3rem;
+  }
+
+  .about-content img {
+    width: 50%;
+    border-radius: 24px;
+  }
+  .left {
+    float: left;
+    margin: 0 20px 20px 20px;
+  }
+  .right {
+    float: right;
+    margin: 0 20px 20px 20px;
+  }
+}
+
+/* // Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  #about p {
+    padding: 0rem;
+  }
+  .about-content {
+    padding: 7.5rem;
+  }
+
+  .about-content img {
+    width: 50%;
+    border-radius: 24px;
+  }
+  .left {
+    float: left;
+    margin: 40px 40px 40px 0px;
+  }
+  .right {
+    float: right;
+    margin: 40px 40px 40px 40px;
+  }
+}
+
+/* // X-Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .about-content {
+    padding: 5rem 10rem;
+  }
+  #about p {
+    padding: 2rem 0rem;
+  }
+}
+
+/* // XX-Large devices (larger desktops, 1400px and up) */
+@media (min-width: 1400px) {
+}

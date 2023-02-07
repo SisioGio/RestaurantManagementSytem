@@ -1,0 +1,11 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /admin
+Disallow: /tickets
+Disallow: /order
+Disallow: /checkout
+Disallow: /account
+Disallow: /signup
+Disallow: /login
+
+

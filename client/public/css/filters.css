@@ -1,0 +1,114 @@
+.categories ul {
+  width: 50%;
+  margin: auto;
+  display: flex;
+  justify-content: space-around;
+  list-style: none;
+}
+
+#filter {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(50%, 1fr));
+  width: 100%;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+#filter a {
+  text-decoration: none;
+  padding: 1rem;
+  display: block;
+  border-bottom: 1px solid black;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.filter-selected {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+#filter ul a {
+  color: white;
+}
+
+#filter ul a:hover {
+  background-color: #202020;
+}
+#clear a {
+  color: red;
+}
+#filter input {
+  font-size: 12px;
+  width: 100%;
+  text-decoration: none;
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  display: block;
+  border-bottom: 1px solid black;
+  white-space: nowrap;
+
+  text-align: center;
+  font-family: Menlo, monospace;
+  color: #373737;
+  line-height: 100% !important;
+}
+
+.tags ul {
+  overflow: hidden;
+  border-radius: 24px;
+  z-index: 10;
+  list-style: none;
+  background: white;
+  position: absolute;
+  width: 100%;
+  background: #3e3e3e;
+  left: 0;
+}
+
+.tags a {
+  border: none;
+}
+.tags {
+  position: relative;
+}
+
+@media (min-width: 576px) {
+  .tags ul {
+    width: fit-content;
+    left: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #filter a {
+    padding: 1rem 5rem;
+  }
+}
+/* // Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  #filter {
+    grid-template-columns: repeat(auto-fit, minmax(25%, 1fr));
+  }
+}
+/* // Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+}
+/* // X-Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  #filter {
+    margin: auto;
+    width: 60%;
+  }
+  #filter a {
+    padding: 1rem 2rem;
+    font-size: 12px;
+  }
+}
+/* // XX-Large devices (larger desktops, 1400px and up) */
+/* @media (min-width: 1400px) {
+  #shop {
+    padding: 2rem 10rem;
+  }
+} */

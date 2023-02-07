@@ -1,0 +1,33 @@
+#onlyForm form{
+
+width: 30%;
+background-color: black;
+padding: 2rem;
+    
+}
+
+.form-input{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin: auto;
+  
+}
+#onlyForm form label{
+    color: white;
+    
+}
+
+.form-input label,.form-input input{
+  
+    line-height: 2rem;
+    
+    display: inline-block;
+
+}
+
+#onlyForm button{
+    width: 50%;
+    font-size: 1.5rem;
+}

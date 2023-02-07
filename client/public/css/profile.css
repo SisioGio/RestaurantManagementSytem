@@ -1,0 +1,438 @@
+.user-data-container h1 {
+  padding: 2rem 0rem;
+}
+.user-data-headers {
+  text-transform: uppercase;
+  font-weight: bold;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+.received {
+  display: flex;
+  justify-content: start;
+}
+.ticket-chat {
+  max-height: 30rem;
+  /* overflow: scroll; */
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.ticket-chat::-webkit-scrollbar {
+  width: 12px; /* width of the entire scrollbar */
+}
+
+.ticket-chat::-webkit-scrollbar-track {
+  background: rgb(255, 255, 255); /* color of the tracking area */
+}
+
+.ticket-chat::-webkit-scrollbar-thumb {
+  background-color: rgb(0, 0, 0); /* color of the scroll thumb */
+  border-radius: 20px; /* roundness of the scroll thumb */
+  border: 3px solid rgb(0, 0, 0); /* creates padding around scroll thumb */
+}
+.received div {
+  border: 1px solid #08a1e7;
+  border-radius: 12px;
+}
+.ticket-message div {
+  padding: 0.5rem 3rem;
+}
+.user-data-headers a {
+  text-transform: uppercase;
+  margin: auto;
+  background: black;
+  padding: 1rem 3rem;
+
+  color: white;
+  margin: 0;
+}
+.status,
+.createdAt {
+  display: none;
+}
+.user-data-title {
+  z-index: 1;
+  white-space: nowrap;
+  left: 50%;
+  font-size: 14px;
+}
+.personal-data-item {
+  display: grid;
+  margin: 1rem 0rem;
+  grid-template-columns: 1fr;
+}
+.personal-data-item label {
+  color: black;
+  display: block;
+}
+.personal-data-form {
+  padding: 2rem 0rem;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.personal-data-item input:not(:disabled),
+.ticket-item input:not(:disabled),
+.ticket-item textarea:not(:disabled) {
+  background-color: rgb(94 93 91 / 0%);
+  border: 1px solid black;
+}
+
+.personal-data-item input:not(:disabled):focus,
+.ticket-item input:not(:disabled):focus,
+.ticket-item textarea:not(:disabled):focus {
+  border: 1px solid #6161ff;
+}
+.personal-data-item label,
+.personal-data-item input,
+.ticket-item {
+  text-transform: uppercase;
+  padding: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.personal-data-form input {
+  background: #0000000a;
+  border-radius: 6px;
+  line-height: 100%;
+  text-transform: uppercase;
+  border: 1px solid #b1aeae;
+}
+.personal-data small {
+  color: black !important;
+}
+
+.right {
+  float: right;
+}
+
+.user-data-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  /* transform: translate(-100%); */
+  transform: translate(-50%, -100%);
+}
+.bg-red {
+  background-color: red;
+}
+.ticket-closed {
+}
+.ticket-open {
+  border-color: green !important;
+}
+.bg-green {
+  background: green;
+}
+.ticket-form-toggle {
+  display: block;
+  width: fit-content;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: white;
+  text-transform: uppercase;
+  border-radius: 12px;
+  font-weight: bold;
+  margin: auto;
+}
+.top-right {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  /* transform: translate(-100%); */
+  transform: translatey(100%);
+}
+
+.bottom-right {
+  position: absolute;
+  right: 0;
+  transform: translate(-100%, -100%);
+}
+.personal-data {
+  position: relative;
+  margin: 2rem 0.2rem;
+  border: 1px solid #e1e1e1;
+  border-radius: 24px;
+  padding: 2rem 0.5rem;
+}
+
+.user-order {
+  position: relative;
+  margin: 2rem;
+  border: 1px solid #e1e1e1;
+  border-radius: 24px;
+  padding: 3rem 1rem;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.order-title {
+  position: relative;
+  background: white;
+  padding: 1rem 1rem;
+}
+
+.ticketdiv:nth-child(1) {
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 24px;
+}
+
+.status {
+  top: 0;
+  left: 0;
+
+  transform: translate(50%, -50%);
+}
+.ticket {
+  padding: 2rem 0.5rem;
+}
+.bg-black {
+  background: BLACK !important;
+}
+.ticket-show,
+.ticket-hide {
+  display: block;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+.ticket small {
+  position: absolute;
+  bottom: 0;
+  transform: translatey(120%);
+  font-weight: lighter;
+}
+.ticket-message {
+  margin: 1rem 0.2rem;
+}
+
+.status-filter {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+.status-filter a {
+  display: block;
+  color: white;
+  background-color: black;
+  border-radius: 12px;
+  text-transform: uppercase;
+  padding: 1rem 2rem;
+}
+.ticket-message div p:nth-child(1) {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 0rem 0.5rem;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ticket-message div {
+  position: relative;
+}
+.sent div {
+  border: 1px solid #098f0e;
+  border-radius: 12px;
+}
+.sent {
+  display: flex;
+  justify-content: end;
+}
+.createdAt {
+  top: 0;
+  right: 0;
+  font-size: 12px;
+  /* transform: translate(-50%, -50%); */
+  transform: translate(-10%, -50%);
+}
+
+.light-text {
+  font-weight: lighter;
+}
+
+.hide {
+  display: none !important;
+}
+.upper {
+  text-transform: uppercase;
+}
+.user-order-header {
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+}
+
+.message-new {
+  position: relative;
+  display: flex;
+  border-radius: 12px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid #b9b9b9;
+  margin-top: 3rem;
+}
+.message-new textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+}
+/* .message-new textarea {
+  display: inline-table;
+  width: 100%;
+  border: 1px solid #575368;
+  border-radius: 4px;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+*/
+.message-new a {
+  font-size: 12px;
+  display: block;
+  background: #4db74d;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  cursor: pointer;
+}
+.user-data-title {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  background: white;
+  padding: 1rem;
+  text-transform: uppercase;
+}
+.user-order-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 200px));
+  justify-items: center;
+  gap: 1rem;
+
+  justify-content: center;
+  justify-items: center;
+}
+
+.user-order-product {
+  border: 1px solid #e1e1e1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.user-order-product img {
+  width: 100%;
+}
+
+.user-order-product-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.2rem 1rem;
+  font-size: 16px;
+  font-weight: lighter;
+}
+
+.user-order-product-info div:nth-child(1) {
+}
+
+.user-order-address {
+  padding-top: 1rem;
+}
+
+.ticket-form {
+  padding: 2rem;
+}
+
+.ticket-item {
+  position: relative;
+  overflow: visible;
+  margin: 1rem 0rem;
+  padding: 0;
+}
+
+.ticket-item label {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: black;
+  padding: 0rem 2rem;
+}
+
+.ticket-item textarea,
+.ticket-item input {
+  width: 100%;
+  padding: 1rem;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+@media (min-width: 576px) {
+  .user-data {
+    padding: 2rem;
+  }
+  .personal-data-form {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .hide {
+    display: grid !important;
+  }
+  .orders-details-expand {
+    display: none;
+  }
+}
+/* // Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .personal-data-item {
+    display: grid;
+    margin: 1rem 0rem;
+    grid-template-columns: 1fr 2fr;
+  }
+  .order-title {
+    background: transparent;
+  }
+
+  .user-order-header p {
+    font-size: 14px;
+    background-color: white;
+  }
+  .user-order-header h3 {
+    background-color: white;
+  }
+  .user-order-header {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    justify-content: space-around;
+    flex-direction: row;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+  }
+}
+/* // Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .user-data {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40%, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+/* // X-Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+}
