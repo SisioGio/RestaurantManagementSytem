@@ -21,7 +21,7 @@ function ProductImage(props) {
     setImages(props.images);
   }, [props.images]);
 
-  useEffect(() => {}, [userAuth]);
+
   return images.length > 0 ? (
     <div id="prod-details-image">
       <img src={props.images[selectedImage].url} alt={generateImageAlt()} />
