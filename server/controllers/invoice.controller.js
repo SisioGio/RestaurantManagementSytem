@@ -7,10 +7,12 @@ const AWS = require("aws-sdk");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const randomstring = require("randomstring");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const s3 = new AWS.S3({
-  accessKeyId: "AKIAYG4A4OEX6GPUUH5L",
-  secretAccessKey: "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",
+  accessKeyId: process.env.accessKeyId,
+  secretAccessKey: process.env.secretAccessKey,
 });
 const saveFileToS3 = async (file) => {
   let fileLocation;
