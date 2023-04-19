@@ -1,20 +1,28 @@
 module.exports = (app) => {
-  const Order = require("../controllers/order.controller.js");
+  const order = require("../controllers/order.controller.js");
   const { authJwt } = require("../middleware");
   var router = require("express").Router();
 
-  router.post("/confirm/:id", [authJwt.verifyToken], Order.confirmOrder);
+  // Create a new order
+  router.post("/", order.create);
+
+  // Update an order
+  router.put("/", order.update);
+
   // Retrieve all order
-  // Retrieve a single Order with id
-  router.get("/", Order.findAll);
-  // Retrieve a single Order with id
-  router.get("/:id", [authJwt.verifyToken], Order.findOne);
+  router.get("/", order.findAll);
+
+  // Retrieve all purchase orders
+  router.get("/purchase/:companyId", order.findPurchaseOrders);
+
+  // Retrieve all sales orders
+  router.get("/sale/:companyId", order.findSalesOrders);
 
   // Delete an order with id
-  router.delete("/:id", [authJwt.verifyToken], Order.delete);
+  router.delete("/:id", order.delete);
 
   // Delete all orders
-  router.delete("/", [authJwt.isAdmin], Order.deleteAll);
+  router.delete("/", order.deleteAll);
 
   app.use("/api/order", router);
 };

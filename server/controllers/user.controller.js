@@ -16,21 +16,20 @@ const { urlencoded } = require("body-parser");
 
 exports.isAuthenticated = async (req, res) => {
   let token = req.headers["x-access-token"];
+  console.log("ACCESS TOKEN RECEIVED: " + token);
   try {
     const user = await User.findOne({
       where: { token: token },
+
+      include: [
+        { model: db.company, include: [{ model: db.vendor, as: "vendors" }] },
+      ],
     });
     if (!user) {
       return res.status(403);
     }
-    var roles = await user.getRoles();
 
-    var output = [];
-    roles.forEach((role) => {
-      output.push(role.dataValues.name);
-    });
-    console.log(output);
-    return res.status(200).send(output);
+    return res.status(200).send(user);
   } catch (err) {
     console.log(err);
     return res.status(500);
@@ -48,16 +47,10 @@ exports.login = async (req, res) => {
     // Validate if user exist in our database
     const user = await User.findOne({
       where: { email: email },
-      include: db.role,
     });
 
     if (!user) {
       return res.status(401).send({ message: "Invalid credentials" });
-    }
-    if (!user.status || user.status.toUpperCase() != "ACTIVE") {
-      return res
-        .status(401)
-        .send({ message: "Please verify your account first" });
     }
 
     if (user && (await bcrypt.compare(password, user.password))) {
@@ -68,12 +61,6 @@ exports.login = async (req, res) => {
 
       let refreshToken = await RefreshToken.createToken(user);
 
-      // get user roles
-      var roles = [];
-      for (var i = 0; i < user.roles.length; i++) {
-        roles.push(user.roles[i].name.toUpperCase());
-      }
-
       await User.update(
         { token: token, refreshToken: refreshToken },
         { where: { id: user.id } }
@@ -81,12 +68,12 @@ exports.login = async (req, res) => {
 
       res.status(200).send({
         id: user.id,
-        firstname: user.firstname,
+        name: user.name,
         surname: user.surname,
         email: user.email,
         accessToken: token,
         refreshToken: refreshToken,
-        roles: roles,
+        companies: await user.getCompanies(),
       });
     } else {
       return res.status(401).send({
@@ -98,6 +85,52 @@ exports.login = async (req, res) => {
     console.log(err);
   }
 };
+
+// Register
+exports.register = async (req, res) => {
+  try {
+    const { name, surname, email, password } = req.body;
+
+    if (!(name && surname && email && password)) {
+      return res.status(400).send({ message: "All fields are mandatory" });
+    }
+
+    //Encrypt user password
+    encryptedPassword = await bcrypt.hash(password, 10);
+    const confirmationCode = randomstring.generate({ length: 30 });
+    const user = await User.create({
+      name,
+      surname,
+      email: email.toLowerCase(),
+      password: encryptedPassword,
+    });
+
+    return res.send(user);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// Verify if confirmation code exists
+exports.verifyUser = async (req, res) => {
+  const confirmationCode = req.params.confirmationCode;
+
+  const userToValidate = await User.findOne({
+    where: { confirmationCode: confirmationCode },
+  });
+
+  if (!userToValidate) {
+    return res.status(400).send({
+      message: `User with confirmation code ${confirmationCode} not found`,
+    });
+  }
+
+  userToValidate.status = "Active";
+  await userToValidate.save();
+  return res.send(userToValidate);
+};
+
 exports.getRefreshTokens = async (req, res) => {
   return res.send(
     await db.refreshToken.findAll({
@@ -183,89 +216,6 @@ exports.resetPassword = async (req, res) => {
   sendResetPasswordEmail(user.firstname, user.email, confirmationCode);
 };
 
-// Create stripe customer
-async function createStripeCustomer({ email, firstname }) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      console.log(firstname);
-      const Customer = await stripe.customers.create({
-        name: firstname,
-        email: email,
-      });
-
-      resolve(Customer);
-    } catch (err) {
-      reject(err);
-    }
-  });
-}
-
-// Register
-exports.register = async (req, res) => {
-  try {
-    const { firstname, surname, email, password, birthDate, roles } = req.body;
-
-    if (!(firstname && surname && email && password && birthDate)) {
-      return res.status(400).send({ message: "All fields are mandatory" });
-    }
-    const customer = await createStripeCustomer({
-      email,
-      firstname,
-    });
-
-    const customer_stripe_id = customer.id;
-
-    //Encrypt user password
-    encryptedPassword = await bcrypt.hash(password, 10);
-    const confirmationCode = randomstring.generate({ length: 30 });
-    const user = await User.create({
-      firstname,
-      surname,
-      email: email.toLowerCase(),
-      birthDate,
-      password: encryptedPassword,
-      confirmationCode: confirmationCode,
-      stripeId: customer_stripe_id,
-    });
-
-    if (req.body.roles) {
-      const roles = await Role.findAll({
-        where: {
-          name: {
-            [Op.or]: req.body.roles,
-          },
-        },
-      });
-
-      user.setRoles(roles);
-    }
-    sendAccountConfirmationEmail(user.firstname, user.email, confirmationCode);
-    res.send({ message: user });
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({ error: err.message });
-  }
-};
-
-// Verify if confirmation code exists
-exports.verifyUser = async (req, res) => {
-  const confirmationCode = req.params.confirmationCode;
-
-  const userToValidate = await User.findOne({
-    where: { confirmationCode: confirmationCode },
-  });
-
-  if (!userToValidate) {
-    return res.status(400).send({
-      message: `User with confirmation code ${confirmationCode} not found`,
-    });
-  }
-
-  userToValidate.status = "Active";
-  await userToValidate.save();
-  return res.send(userToValidate);
-};
-
 // Configure gmail account to send emails
 const transport = nodemailer.createTransport({
   service: "Gmail",
@@ -278,6 +228,7 @@ const transport = nodemailer.createTransport({
     pass: config.GMAIL_SECRET,
   },
 });
+
 exports.sendConfirmationEmail = async (req, res) => {
   const email = req.params.email;
   if (!email) {
@@ -375,7 +326,7 @@ const sendResetPasswordEmail = (name, email, confirmationCode) => {
 
 // Retrieve all Users from the database.
 exports.findAll = async (req, res) => {
-  await User.findAll({ include: [{ model: db.role, attributes: ["name"] }] })
+  await User.findAll()
     .then((data) => {
       res.send(data);
     })
@@ -492,57 +443,4 @@ exports.deleteAll = async (req, res) => {
         message: err.message || "Some error occurred while removing all Users.",
       });
     });
-};
-
-// Get user orders
-
-exports.getUserOrders = async (req, res) => {
-  const userId = req.params.idUser;
-  await db.order
-    .findAll({
-      where: { userId: userId },
-      include: [
-        { model: db.user },
-        { model: db.address },
-        {
-          model: db.orderProduct,
-          include: [
-            {
-              model: db.stock,
-              include: [
-                { model: db.size },
-                { model: db.product, include: [db.image] },
-              ],
-            },
-          ],
-        },
-      ],
-    })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving Orders.",
-      });
-    });
-};
-// Get user tickets
-exports.getUserTickets = async (req, res) => {
-  try {
-    const result = await sequelize.transaction(async (t) => {
-      const userId = req.params.id;
-
-      const tickets = await db.ticket.findAll({
-        where: { userId: userId },
-        transaction: t,
-        include: [{ model: db.message, include: [db.user] }],
-      });
-      return res.send(tickets);
-    });
-  } catch (err) {
-    res.status(500).send({
-      message: err.message || "Some error occurred while retrieving tickets.",
-    });
-  }
 };

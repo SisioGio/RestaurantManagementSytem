@@ -23,28 +23,38 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+db.account = require("./account.model.js")(sequelize, Sequelize);
 db.product = require("./product.model.js")(sequelize, Sequelize);
 
-db.order = require("./order.model.js")(sequelize, Sequelize);
-db.stock = require("./stock.model.js")(sequelize, Sequelize);
-db.size = require("./size.model.js")(sequelize, Sequelize);
-db.payment = require("./payment.model.js")(sequelize, Sequelize);
-db.refreshToken = require("./refreshToken.model.js")(sequelize, Sequelize);
-db.image = require("./image.model.js")(sequelize, Sequelize);
-db.role = require("./role.model.js")(sequelize, Sequelize);
 db.address = require("./address.model.js")(sequelize, Sequelize);
-db.coupon = require("./coupon.model.js")(sequelize, Sequelize);
-db.delivery = require("./delivery.model.js")(sequelize, Sequelize);
-db.discount = require("./discount.model.js")(sequelize, Sequelize);
-db.notification = require("./notification.model.js")(sequelize, Sequelize);
+db.businessLine = require("./businessLine.model.js")(sequelize, Sequelize);
+db.company = require("./company.model.js")(sequelize, Sequelize);
+db.costCenter = require("./costCenter.model.js")(sequelize, Sequelize);
+db.factory = require("./factory.model.js")(sequelize, Sequelize);
+db.invoice = require("./invoice.model.js")(sequelize, Sequelize);
+db.invoiceLine = require("./invoiceLine.model.js")(sequelize, Sequelize);
+db.order = require("./order.model.js")(sequelize, Sequelize);
 db.orderProduct = require("./orderProduct.model.js")(sequelize, Sequelize);
-db.user = require("./user.model.js")(sequelize, Sequelize);
-db.ticket = require("./ticket.model.js")(sequelize, Sequelize);
-db.message = require("./messages.js")(sequelize, Sequelize);
+db.payment = require("./payment.model.js")(sequelize, Sequelize);
 
-db.verificationCode = require("./messages.js")(sequelize, Sequelize);
-db.category = require("./category.model.js")(sequelize, Sequelize);
-db.tag = require("./tag.model.js")(sequelize, Sequelize);
-db.productTag = require("./productTag.model.js")(sequelize, Sequelize);
+db.refreshToken = require("./refreshToken.model.js")(sequelize, Sequelize);
+db.taxCode = require("./taxCode.model.js")(sequelize, Sequelize);
+db.transaction = require("./transaction.model.js")(sequelize, Sequelize);
+
+db.user = require("./user.model.js")(sequelize, Sequelize);
+
+db.verificationCode = require("./verificationCode.model.js")(
+  sequelize,
+  Sequelize
+);
+
+db.image = require("./image.model.js")(sequelize, Sequelize);
+
+db.customerGroup = require("./customerGroup.model.js")(sequelize, Sequelize);
+db.customer = require("./customer.model.js")(sequelize, Sequelize);
+
+db.vendor = require("./vendor.model.js")(sequelize, Sequelize);
+db.paymentTerm = require("./paymentTerms.model.js")(sequelize, Sequelize);
+db.taxValues = require("./taxValues.model.js")(sequelize, Sequelize);
 
 module.exports = db;

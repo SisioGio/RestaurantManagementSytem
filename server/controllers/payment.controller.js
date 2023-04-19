@@ -1,114 +1,84 @@
 const db = require("../models");
 const Payment = db.payment;
 const Op = db.Sequelize.Op;
-const { sequelize } = require("../models");
 
-// Not used
-// Create and Save a new User
+// Create and Save a new Payment
 exports.create = async (req, res) => {
+  // Save Payment in the database
   try {
-    const result = await sequelize.transaction(async (t) => {
-      const amount = req.body.amount;
-      const userId = req.body.userId;
-      const cartId = req.body.cartId;
-      const paymentMethodId = req.body.paymentMethodId;
-      const type = req.body.type;
-      const transactionHash = req.body.transactionHash;
-      // Check if user exists
-
-      const user = await db.user.findByPk(userId);
-      if (!user) {
-        return res.status(500).send({
-          message: "User does not exist",
-        });
-      }
-
-      // Check if cart exists
-
-      var cart = await db.cart.findByPk(cartId);
-      if (!cart) {
-        return res.status(500).send({
-          message: "Cart does not exist",
-        });
-      }
-
-      // Check if payment method exists
-      console.log(!paymentMethod && !transactionHash);
-      console.log(transactionHash);
-      var paymentMethod = await db.paymentMethod.findByPk(paymentMethodId);
-      if (!paymentMethod && !transactionHash) {
-        return res.status(500).send({
-          message: "paymentMethod does not exist",
-        });
-      }
-      // Check if payment method is assigned to the purchaser user
-      if (paymentMethod.userId != userId) {
-        return res.status(500).send({
-          message:
-            "Nice try! The payment method is not assigned to the specified user. Get a job",
-        });
-      }
-
-      // Check if payment has been already done
-      var payment = await Payment.findOne({
-        where: {
-          userId: userId,
-          cartId: cartId,
-          amount: amount,
-          type: type,
-          transactionHash: transactionHash,
-        },
-      });
-
-      if (payment) {
-        return res.send(payment);
-      }
-      // Create a payment
-      payment = {
-        amount: amount,
-        cartId: cartId,
-        userId: userId,
-        paymentMethodId: paymentMethodId,
-        type: type,
-        transactionHash: transactionHash,
-      };
-
-      // Save User in the database
-      await db.payment.create(payment);
-
-      return res.send(payment);
-    });
-  } catch (error) {
+    await Payment.create(req.body);
+    return res.send();
+  } catch (err) {
     res.status(500).send({
-      message: error.message || "Some error occurred while retrieving Orders.",
+      message: err.message || "Some error occurred while creating the Payment.",
     });
   }
 };
 
-// Retrieve all Users from the database.
+
 exports.findAll = (req, res) => {
+  // Validate request
   Payment.findAll()
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving Users.",
+        message:
+          err.message || "Some error occurred while retrieving Payments.",
       });
     });
 };
-// Delete all Users from the database.
+// Update a Payment by the id in the request form
+exports.update = async (req, res) => {
+  const id = req.body.id;
+  try {
+    let Payment = await Payment.update(req.body, { where: { id: id } });
+    return res.send(await Payment.findByPk(id));
+  } catch (err) {
+    res.status(500).send({
+      message: "Error updating Payment with id=" + id,
+    });
+  }
+};
+// Delete a Payment with the specified id in the request
+exports.delete = (req, res) => {
+  const id = req.params.id;
+
+  Payment.destroy({
+    where: { id: id },
+  })
+    .then((num) => {
+      if (num == 1) {
+        res.send({
+          message: "Payment was deleted successfully!",
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Payment with id=${id}. Maybe Payment was not found!`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Could not delete Payment with id=" + id,
+      });
+    });
+};
+
+// Delete all Payment from the database.
 exports.deleteAll = (req, res) => {
   Payment.destroy({
     where: {},
     truncate: false,
   })
     .then((nums) => {
-      res.send({ message: `${nums} Payments were deleted successfully!` });
+      res.send({ message: `${nums} Payment were deleted successfully!` });
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while removing all Users.",
+        message:
+          err.message || "Some error occurred while removing all Payment.",
       });
     });
 };

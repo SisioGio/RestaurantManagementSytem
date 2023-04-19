@@ -1,44 +1,350 @@
 import api from "./api";
 import apiFiles from "./apiService";
 class ApiService {
-  signin(email, password) {
-    return api
-      .post("/api/user/login", {
-        email,
-        password,
-      })
-      .then((response) => {
-        if (response.data.accessToken) {
-          this.setUser(response.data);
-        }
-        return response;
-      });
+  // User
+  signin(form) {
+    return api.post("/api/user/login", form).then((response) => {
+      if (response.data.accessToken) {
+        this.setUser(response.data);
+      }
+      return response;
+    });
   }
 
-  isAuthenticated = async (requestedRole) => {
+  isAuthenticated = async () => {
     var output = false;
 
-    return api.get("/api/user/is_authenticated").then((response) => {
-      console.log(response.data);
-      if (requestedRole && response.data.indexOf(requestedRole) > -1) {
-        return true;
-      }
-      if (!requestedRole) {
-        return true;
-      }
-    });
+    return api.get("/api/user/is_authenticated");
   };
+  signup(form) {
+    return api.post("/api/user", form);
+  }
 
+  // Vendor
+
+  getVendors(customerId) {
+    return api.get(`/api/vendor/${customerId}`);
+  }
+
+  addVendor(form) {
+    return api.post("/api/vendor", form);
+  }
+
+  // Customer
+
+  getCustomers(vendorId) {
+    return api.get(`/api/customer/${vendorId}`);
+  }
+
+  addCustomer(form) {
+    return api.post("/api/customer", form);
+  }
+
+  // Product
+
+  addProduct(form) {
+    return api.post("/api/product", form);
+  }
+  updateProduct(form) {
+    return api.put("/api/product", form);
+  }
+  getProduct(companyId) {
+    return api.get(`/api/company/products/${companyId}`);
+  }
+  // TaxCode
+
+  getCompanyTaxCodes(companyId) {
+    return api.get(`/api/taxcode/${companyId}`);
+  }
+  updateTaxCode(form) {
+    return api.put(`/api/taxcode`, form);
+  }
+  addTaxCode(form) {
+    return api.post(`/api/taxcode`, form);
+  }
+  // Order
+
+  createOrder(form) {
+    return api.post("/api/order", form);
+  }
+
+  getPurchaseOrders(companyId) {
+    return api.get(`/api/order/purchase/${companyId}`);
+  }
+
+  getSalesOrders(companyId) {
+    return api.get(`/api/order/sale/${companyId}`);
+  }
+
+  // Tax Codes
+
+  getTaxCodes(companyId) {
+    return api.get(`/api/taxcode/${companyId}`);
+  }
+
+  createTaxCode(form) {
+    return api.post("/api/taxcode", form);
+  }
+
+  // Customer
+
+  updateCustomer(form) {
+    return api.put("/api/customer", form);
+  }
+  // Customer Groups
+
+  getCustomerGroups(companyId) {
+    return api.get(`/api/customerGroup/${companyId}`);
+  }
+
+  createCustomerGroup(form) {
+    return api.post("/api/customerGroup", form);
+  }
+
+  // Tax Values
+
+  getTaxValues(companyId) {
+    return api.get(`/api/taxValues/${companyId}`);
+  }
+
+  updateTaxValue(form) {
+    return api.put("/api/taxValues", form);
+  }
+
+  // Invoice
+
+  createInvoice(form) {
+    return api.post("/api/invoice", form);
+  }
+  getSalesInvoices() {
+    return api.get(`/api/invoice/sales/${this.getCompany().id}`);
+  }
+
+  getPurchaseInvoices() {
+    return api.get(`/api/invoice/purchase/${this.getCompany().id}`);
+  }
+
+  getSuggestedTransactions(customerId, invoiceId, productId) {
+    return api.get(
+      `/api/invoice/suggestion/${customerId}/${invoiceId}/${productId}`
+    );
+  }
+  parkInvoice(form) {
+    return api.post("/api/transactions", form);
+  }
+
+  updateInvoice() {
+    return api.put("/api/invoice");
+  }
+  // Business Line
+  createBusinessLine(form) {
+    return api.post("/api/businessline", form);
+  }
+  getBusinessLines(companyId) {
+    return api.get(`/api/businessline/${companyId}`);
+  }
+  // Account
+  createAccount(form) {
+    return api.post("/api/account", form);
+  }
+  getAccounts(companyId) {
+    return api.get(`/api/account/${companyId}`);
+  }
+  // Cost Centers
+  createCostCenter(form) {
+    return api.post("/api/costcenter", form);
+  }
+  getCostCenters(companyId) {
+    return api.get(`/api/costcenter/${companyId}`);
+  }
+  // Factory
+  createFactory(form) {
+    return api.post("/api/factory", form);
+  }
+  getFactories(companyId) {
+    return api.get(`/api/factory/${companyId}`);
+  }
+  // Company
+
+  createCompany(form) {
+    return api.post("/api/company", form);
+  }
+  updateCompany(form) {
+    return api.put("/api/company", form);
+  }
+
+  getCompanies(userId) {
+    return api.get(`/api/company/${userId}`);
+  }
+
+  /// Local Storage - Invoices Lines
+
+  getInvoicesProducts() {
+    var invoices = JSON.parse(localStorage.getItem("invoices"));
+    if (!invoices) {
+      localStorage.setItem("invoices", JSON.stringify([]));
+    }
+    return JSON.parse(localStorage.getItem("invoices"));
+  }
+
+  getInvoiceLines(invoiceId) {
+    var allLines = this.getInvoicesProducts();
+
+    return allLines.filter((line) => line.invoiceId == invoiceId);
+  }
+  findInvoiceProductIndex(invoiceId, productId) {
+    if (this.getInvoicesProducts().length === 0) {
+      return -1;
+    }
+    return this.getInvoicesProducts().findIndex(
+      (product) =>
+        (product.invoiceId === invoiceId) & (product.productId === productId)
+    );
+  }
+  getInvoiceProductLines(invoice, product, lineId) {
+    var invoices = this.getInvoicesProducts();
+    var productIndex = this.findInvoiceProductIndex(invoice.id, product.id);
+    if (productIndex === -1) {
+      invoices.push({
+        invoiceId: invoice.id,
+        productId: product.id,
+        lines: [
+          {
+            id: 1,
+            accountId: "",
+            costCenterId: "",
+            factoryId: "",
+            description: "",
+            taxValueId: "",
+            netAmount: "",
+            taxAmount: "",
+            totalAmount: "",
+            businessLineId: "",
+            invoiceLineId: lineId,
+          },
+        ],
+      });
+      localStorage.setItem("invoices", JSON.stringify(invoices));
+      this.getInvoiceProductLines(invoice, product);
+    }
+
+    var outputLines = invoices.filter(
+      (invoiceLine) =>
+        (invoiceLine.invoiceId === invoice.id) &
+        (invoiceLine.productId === product.id)
+    );
+    return outputLines[0];
+  }
+
+  addInvoiceLine(invoice, product, line) {
+    var invoiceItem = this.getInvoiceProductLines(invoice, product);
+    line.id = invoiceItem.lines.length + 1;
+    invoiceItem.lines.push(line);
+    var invoices = this.getInvoicesProducts();
+    var itemIndex = this.findInvoiceProductIndex(invoice.id, product.id);
+
+    if (itemIndex > -1) {
+      invoices[itemIndex] = invoiceItem;
+      localStorage.setItem("invoices", JSON.stringify(invoices));
+    }
+  }
+
+  addProposedLine(invoice, productId, line) {
+    var invoices = this.getInvoicesProducts();
+    var productIndex = this.findInvoiceProductIndex(invoice.id, productId);
+    if (productIndex === -1) {
+      line.id = 1;
+      invoices.push({
+        invoiceId: invoice.id,
+        productId: productId,
+        lines: [line],
+      });
+    } else {
+      let invoiceProductLineIndex = invoices[productIndex].lines.findIndex(
+        (extiningLine) => extiningLine.dbId == line.dbId
+      );
+      if (invoiceProductLineIndex === -1) {
+        line.id = invoices[productIndex].lines.length;
+        invoices[productIndex].lines.push(line);
+      }
+    }
+
+    localStorage.setItem("invoices", JSON.stringify(invoices));
+  }
+
+  updateInvoiceProductLine(invoice, product, line) {
+    var invoiceItem = this.getInvoiceProductLines(invoice, product);
+    var invoices = this.getInvoicesProducts();
+    var itemIndex = this.findInvoiceProductIndex(invoice.id, product.id);
+    if (itemIndex > -1) {
+      var invoiceProductLineIndex = invoiceItem.lines.findIndex(
+        (lineItem) => lineItem.id === line.id
+      );
+
+      invoiceItem.lines[invoiceProductLineIndex] = line;
+      invoices[itemIndex] = invoiceItem;
+      localStorage.setItem("invoices", JSON.stringify(invoices));
+    }
+  }
+
+  removeInvoiceProductLine(invoiceId, productId, lineId) {
+    var invoices = this.getInvoicesProducts();
+    var invIndex = this.findInvoiceProductIndex(invoiceId, productId);
+    var invLines = invoices[invIndex].lines;
+    var lineIndex = invLines.findIndex((line) => line.id == lineId);
+
+    var filteredLines = invLines.filter((line) => line.id != lineId);
+
+    invoices[invIndex].lines = filteredLines;
+    localStorage.setItem("invoices", JSON.stringify(invoices));
+  }
+  /// Local Storage - User
   logout() {
     localStorage.removeItem("user");
   }
 
-  removeProductFromCart(stock) {
-    const cart = JSON.parse(localStorage.getItem("cart"));
-    if (!cart) {
-      console.log("Cart does not exists");
-      return;
-    }
+  setUser(user) {
+    localStorage.setItem("user", JSON.stringify(user));
+  }
+  setCompany(companyId) {
+    let companies = this.getUser().companies;
+    console.log(companies);
+    var company = companies.find((companyObj) => {
+      return companyObj.id == companyId;
+    });
+
+    localStorage.setItem("company", JSON.stringify(company));
+  }
+  getCompany() {
+    return JSON.parse(localStorage.getItem("company"));
+  }
+  addCompanyToLocalStorage(company) {
+    let user = this.getUser();
+    user.companies.push(company);
+    this.setUser(user);
+  }
+  getUser() {
+    return JSON.parse(localStorage.getItem("user"));
+  }
+  getCurrentUser() {
+    return JSON.parse(localStorage.getItem("user"));
+  }
+
+  getLocalRefreshToken() {
+    const user = JSON.parse(localStorage.getItem("user"));
+    return user ? user["refreshToken"] : null;
+  }
+
+  getLocalAccessToken() {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    return user ? user["accessToken"] : null;
+  }
+
+  updateLocalAccessToken(token) {
+    let user = JSON.parse(localStorage.getItem("user"));
+    user.accessToken = token;
+    localStorage.setItem("user", JSON.stringify(user));
   }
 
   getCartItems() {
@@ -53,46 +359,27 @@ class ApiService {
   }
 
   deleteCart() {
-    const cart = localStorage.getItem("cart");
+    let carts = this.getCarts();
 
-    if (cart) {
-      localStorage.removeItem("cart");
-    }
+    carts = carts.filter((cart) => cart.company.id != this.getCompany().id);
+
+    localStorage.setItem("carts", JSON.stringify(carts));
   }
-  removeProductFromCart(stockId) {
-    const cart = JSON.parse(localStorage.getItem("cart"));
-    const cart_items = cart.items;
-    console.log(stockId);
 
-    const cart_items_filtered = cart_items.filter(
-      (item) => item.stock != stockId
-    );
-    console.log(cart_items_filtered);
-
-    cart.items = cart_items_filtered;
-    cart.totalAmount =
-      this.calculateCartTotalAmount(cart_items_filtered).totalAmount;
-    cart.numberOfItems =
-      this.calculateCartTotalAmount(cart_items_filtered).numberOfItems;
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }
   calculateCartTotalAmount(cartItems) {
     let numberOfItems = 0;
     let totalAmount = 0;
 
     for (let item of cartItems) {
       totalAmount =
-        totalAmount + parseFloat(item.quantity) * parseFloat(item.productPrice);
+        totalAmount +
+        parseFloat(item.quantity) * parseFloat(item.product.price);
       numberOfItems = parseFloat(numberOfItems) + parseFloat(item.quantity);
     }
 
     return { totalAmount, numberOfItems };
   }
 
-  createCreditCardPayment(form) {
-    return api.post("/stripe/create-checkout-session", form);
-  }
   updateCartItemQuantity(stockId, quantity) {
     const cart = localStorage.getItem("cart");
     let updatedCart = JSON.parse(cart).items;
@@ -116,290 +403,84 @@ class ApiService {
     );
   }
 
-  addProductToCart(stock, product, size, quantity) {
-    let cart_item = {
-      stock: stock.id,
-      productId: product.id,
-      productName: product.name,
-      productPrice: product.price,
-      image: product.images[0].url,
-      sizeId: size.id,
-      sizeName: size.name,
-      quantity: quantity,
-      stripe_price: product.stripe_price,
-    };
-
-    const cart = localStorage.getItem("cart");
-
+  getCarts() {
+    let cart = JSON.parse(localStorage.getItem("carts"));
     if (!cart) {
-      localStorage.setItem(
-        "cart",
-        JSON.stringify({
-          items: [cart_item],
-          numberOfItems: quantity,
-          totalAmount: parseFloat(quantity) * parseFloat(product.price),
-        })
-      );
+      localStorage.setItem("carts", JSON.stringify([]));
+      cart = JSON.parse(localStorage.getItem("carts"));
+    }
+
+    return cart;
+  }
+
+  getCompanyCart() {
+    let company = this.getCompany();
+    var carts = this.getCarts();
+    let cart;
+    const cartIndex = carts.findIndex((item) => item.company.id == company.id);
+    if (cartIndex === -1) {
+      cart = {
+        company: company,
+        items: [],
+        numberOfItems: 0,
+        totalAmount: 0,
+      };
+      carts.push(cart);
+      localStorage.setItem("carts", JSON.stringify(carts));
+      this.getCompanyCart();
     } else {
-      let updatedCart = JSON.parse(cart).items;
-
-      // Check if item is already in cart
-
-      const itemIndex = updatedCart.findIndex(
-        (item) => item.stock === stock.id
-      );
-
-      if (itemIndex > -1) {
-        updatedCart[itemIndex].quantity =
-          parseFloat(updatedCart[itemIndex].quantity) + parseFloat(quantity);
-        updatedCart[itemIndex].totalAmount =
-          parseFloat(updatedCart[itemIndex].totalAmount) +
-          parseFloat(quantity) * parseFloat(product.price);
-      } else {
-        updatedCart.push(cart_item);
-      }
-
-      localStorage.setItem(
-        "cart",
-        JSON.stringify({
-          items: updatedCart,
-          numberOfItems:
-            this.calculateCartTotalAmount(updatedCart).numberOfItems,
-          totalAmount: this.calculateCartTotalAmount(updatedCart).totalAmount,
-        })
-      );
+      return carts[cartIndex];
     }
   }
-  register(firstname, surname, email, password) {
-    return api.post("/register", {
-      firstname,
-      surname,
-      email,
-      password,
-    });
-  }
 
-  getCurrentUser() {
-    return JSON.parse(localStorage.getItem("user"));
+  updateCart(cart) {
+    let company = this.getCompany();
+    var carts = this.getCarts();
+    const cartIndex = carts.findIndex((item) => item.company.id == company.id);
+    carts[cartIndex] = cart;
+    localStorage.setItem("carts", JSON.stringify(carts));
   }
-
-  getLocalRefreshToken() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    return user ? user["refreshToken"] : null;
-  }
-
-  getLocalAccessToken() {
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    return user ? user["accessToken"] : null;
-  }
-
-  updateLocalAccessToken(token) {
-    let user = JSON.parse(localStorage.getItem("user"));
-    user.accessToken = token;
-    localStorage.setItem("user", JSON.stringify(user));
-  }
-
-  getCategories() {
-    return api.get("/api/category");
-  }
-  setUser(user) {
-    localStorage.setItem("user", JSON.stringify(user));
-  }
-
-  getUser() {
-    return JSON.parse(localStorage.getItem("user"));
-  }
-
-  isAdmin() {
-    let user = JSON.parse(localStorage.getItem("user"));
-    try {
-      return user.roles.indexOf("ADMIN") > -1;
-    } catch {
-      return false;
+  addProductToCart(product, quantity) {
+    let cart_item = {
+      product: product,
+      quantity: quantity,
+    };
+    // Get Cart
+    let cart = this.getCompanyCart();
+    // Check if item is already in cart
+    const itemIndex = cart.items.findIndex(
+      (item) => item.product.id === product.id
+    );
+    // Update cart quantity
+    cart.totalAmount =
+      parseFloat(cart.totalAmount) +
+      parseFloat(quantity) * parseFloat(product.price);
+    // Update total amount
+    cart.numberOfItems = parseFloat(cart.numberOfItems) + parseFloat(quantity);
+    if (itemIndex > -1) {
+      cart.items[itemIndex].quantity =
+        parseFloat(cart.items[itemIndex].quantity) + parseFloat(quantity);
+    } else {
+      cart.items.push(cart_item);
     }
-  }
-  getUserOrders(userId) {
-    return api.get(`/api/user/${userId}/order/`);
+
+    this.updateCart(cart);
   }
 
-  getAdminOrders() {
-    return api.get(`/api/order/`);
-  }
+  removeProductFromCart(productId) {
+    const cart = this.getCompanyCart();
 
-  async addTicketMessage(form) {
-    return await api.post("/api/ticket", form);
-  }
-  getOrderDetails(orderId) {
-    return api.get(`/api/user/${orderId}/order`);
-  }
+    const cart_items_filtered = cart.items.filter(
+      (item) => item.product.id != productId
+    );
 
-  addProduct(form) {
-    return api.post("/api/product", form);
-  }
+    cart.items = cart_items_filtered;
+    cart.totalAmount =
+      this.calculateCartTotalAmount(cart_items_filtered).totalAmount;
+    cart.numberOfItems =
+      this.calculateCartTotalAmount(cart_items_filtered).numberOfItems;
 
-  updateProduct(productId, form) {
-    return api.put(`/api/product/${productId}`, form);
-  }
-
-  async getProducts() {
-    return await api.get("/api/product/");
-  }
-
-  deleteProduct(productId) {
-    return api.delete(`/api/product/${productId}`);
-  }
-
-  getSizes() {
-    return api.get("/api/size");
-  }
-  getTags() {
-    return api.get("/api/tag");
-  }
-  addSize(form) {
-    return api.post("/api/size", form);
-  }
-  deleteSize(sizeId) {
-    return api.delete(`/api/size/${sizeId}`);
-  }
-  updateSize(sizeId, form) {
-    return api.put(`/api/size/${sizeId}`, form);
-  }
-
-  getStocks() {
-    return api.get("/api/stock");
-  }
-
-  deleteStock(stockId) {
-    return api.delete(`/api/stock/${stockId}`);
-  }
-  updateStock(stockId, form) {
-    return api.put(`/api/stock/${stockId}`, form);
-  }
-
-  addStock(form) {
-    return api.post("/api/stock", form);
-  }
-  deleteStock(stockId) {
-    return api.delete(`/api/stock/${stockId}`);
-  }
-  updateStock(stockId, form) {
-    return api.put(`/api/stock/${stockId}`, form);
-  }
-
-  getUsers() {
-    return api.get("/api/user");
-  }
-  getUserFromDB(id) {
-    return api.get("/api/user/" + id);
-  }
-  updateUser(id, form) {
-    return api.put("/api/user/" + id, form);
-  }
-  getUserCartItems() {
-    let user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      return api.get(`/api/cart/user/${user.id}`);
-    }
-    return new Error("User is not logged in");
-  }
-
-  getShopItems() {
-    return api.get("/api/stock/catalog");
-  }
-
-  deleteCartItem(cartItemId, stockId) {
-    return api.delete(`/api/cartitem/${cartItemId}/${stockId}`);
-  }
-
-  getPaymentMethods() {
-    let user = JSON.parse(localStorage.getItem("user"));
-    return api.get(`/api/paymentMethod/user/${user.id}`);
-  }
-
-  addPaymentMethod(form) {
-    return api.post("/api/paymentMethod", form);
-  }
-  deletePaymentMethod(paymentMethodId) {
-    return api.delete(`/api/paymentMethod/${paymentMethodId}`);
-  }
-  updatePaymentMethod(paymentMethodId, form) {
-    return api.put(`/api/paymentMethod/${paymentMethodId}`, form);
-  }
-
-  createOrder(form) {
-    return api.post("/api/order", form);
-  }
-
-  sendconfirmationemail(email) {
-    return api.get("/api/user/sendconfirmationemail/" + email);
-  }
-
-  verifyConfirmationCode(code) {
-    return api.get("api/user/confirmation/" + code);
-  }
-
-  deleteImageFromDb(id) {
-    return api.delete("/api/image/" + id);
-  }
-
-  getCategories() {
-    return api.get("/api/category");
-  }
-
-  addNewCategory(name) {
-    return api.post("/api/category/" + name);
-  }
-
-  getTags() {
-    return api.get("/api/tag");
-  }
-
-  addNewTag(name) {
-    return api.post("/api/tag/" + name);
-  }
-  getUserAddress(id) {
-    return api.get("/api/address/" + id);
-  }
-  deleteAddress(id) {
-    return api.delete("/api/address/" + id);
-  }
-
-  updateAddress(form) {
-    return api.put("/api/address/", form);
-  }
-  closeTicket(id) {
-    return api.put("/api/ticket/close/" + id);
-  }
-  getUserTickets(id) {
-    return api.get(`/api/user/${id}/tickets`);
-  }
-  deleteAddress(id) {
-    return api.delete("/api/address/" + id);
-  }
-  addAddress(form) {
-    return api.post("/api/address", form);
-  }
-  createStripeSession() {
-    return api.post("/stripe/create-checkout-session");
-  }
-
-  confirmOrder(orderId) {
-    return api.post("/api/order/confirm/" + orderId);
-  }
-
-  async getAllTickets() {
-    return await api.get("/api/ticket");
-  }
-  getProductDetails(productName) {
-    return api.get("/api/product/" + productName);
-  }
-
-  updatePassword(form) {
-    return api.put("/api/user/updatePassword", form);
-  }
-  resetPassword(email) {
-    return api.post("/api/user/resetPassword", { email });
+    this.updateCart(cart);
   }
 }
 

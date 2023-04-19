@@ -1,16 +1,23 @@
 module.exports = (app) => {
-  const Payment = require("../controllers/payment.controller.js");
+  const payment = require("../controllers/payment.controller.js");
   const { authJwt } = require("../middleware");
   var router = require("express").Router();
 
-  // Create a new Payment
-  router.post("/", [authJwt.verifyToken], Payment.create);
+  // Create a new payment
+  router.post("/", payment.create);
 
-  // Retrieve all Payment
-  router.get("/", [authJwt.isAdmin], Payment.findAll);
+  
+  // Update an payment
+  router.put("/", payment.update);
 
-  // Delete all Payment
-  router.delete("/", [authJwt.isAdmin], Payment.deleteAll);
+  // Retrieve all payment
+  router.get("/",  payment.findAll);
+
+  // Delete an payment with id
+  router.delete("/:id", payment.delete);
+
+  // Delete all payments
+  router.delete("/",  payment.deleteAll);
 
   app.use("/api/payment", router);
 };

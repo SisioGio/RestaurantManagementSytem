@@ -4,19 +4,20 @@ module.exports = (app) => {
   var router = require("express").Router();
 
   // Create a new address
-  router.post("/", [authJwt.verifyToken], address.create);
-  router.get("/:userId", [authJwt.verifyToken], address.getUserAddress);
+  router.post("/", address.create);
+
+  
   // Update an address
-  router.put("/", [authJwt.verifyToken], address.update);
+  router.put("/", address.update);
 
   // Retrieve all address
-  router.get("/", [authJwt.isAdmin], address.findAll);
+  router.get("/",  address.findAll);
 
   // Delete an address with id
-  router.delete("/:id", [authJwt.verifyToken], address.delete);
+  router.delete("/:id", address.delete);
 
   // Delete all addresss
-  router.delete("/", [authJwt.isAdmin], address.deleteAll);
+  router.delete("/",  address.deleteAll);
 
   app.use("/api/address", router);
 };

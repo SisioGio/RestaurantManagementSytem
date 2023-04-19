@@ -9,11 +9,11 @@ module.exports = (sequelize, Sequelize) => {
           notNull: { msg: "transactionHash is required" },
         },
       },
-      type: {
-        type: Sequelize.STRING,
+      amount: {
+        type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
         validate: {
-          notNull: { msg: "type is required" },
+          notNull: { msg: "amount is required" },
         },
       },
     },

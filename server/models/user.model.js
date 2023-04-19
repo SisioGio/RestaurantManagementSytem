@@ -2,11 +2,11 @@ module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define(
     "user",
     {
-      firstname: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
-          notNull: { msg: "firstname is required" },
+          notNull: { msg: "name is required" },
         },
       },
       surname: {
@@ -19,6 +19,7 @@ module.exports = (sequelize, Sequelize) => {
       email: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
         validate: {
           notNull: { msg: "email is required" },
         },
@@ -31,19 +32,10 @@ module.exports = (sequelize, Sequelize) => {
         },
       },
 
-      stripeId: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: "pasword is required" },
-        },
-      },
       token: {
         type: Sequelize.STRING,
       },
-      birthDate: {
-        type: Sequelize.DATE,
-      },
+      
       status: {
         type: Sequelize.STRING,
         enum: ["Pending", "Active"],

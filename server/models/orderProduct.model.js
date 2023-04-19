@@ -1,13 +1,12 @@
 module.exports = (sequelize, Sequelize) => {
   const OrderProduct = sequelize.define(
-    "order_product",
+    "orderProduct",
     {
-      idOrderProduct: {
+      id: {
         type: Sequelize.INTEGER,
-        autoIncrement: true,
         primaryKey: true,
+        autoIncrement: true, // Automatically gets converted to SERIAL for postgres
       },
-
       quantity: {
         type: Sequelize.INTEGER,
         allowNull: false,

@@ -14,21 +14,19 @@ exports.create = async (req, res) => {
     });
   }
 };
-
-exports.getUserAddress = async (req, res) => {
+// Update a Address by the id in the request form
+exports.update = async (req, res) => {
+  const id = req.body.id;
   try {
-    const userId = req.params.userId;
-    let data = await Address.findAll({
-      where: {
-        userId: userId,
-      },
-    });
-
-    return res.send(data);
+    let address = await Address.update(req.body, { where: { id: id } });
+    return res.send(await Address.findByPk(id));
   } catch (err) {
-    console.log(err);
+    res.status(500).send({
+      message: "Error updating Address with id=" + id,
+    });
   }
 };
+
 exports.findAll = (req, res) => {
   // Validate request
   Address.findAll()
@@ -42,18 +40,7 @@ exports.findAll = (req, res) => {
       });
     });
 };
-// Update a Address by the id in the request form
-exports.update = async (req, res) => {
-  const id = req.body.id;
-  try {
-    let address = await Address.update(req.body, { where: { id: id } });
-    return res.send(await Address.findByPk(id));
-  } catch (err) {
-    res.status(500).send({
-      message: "Error updating Address with id=" + id,
-    });
-  }
-};
+
 // Delete a Address with the specified id in the request
 exports.delete = (req, res) => {
   const id = req.params.id;

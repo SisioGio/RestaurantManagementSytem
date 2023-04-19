@@ -2,16 +2,18 @@ module.exports = (sequelize, Sequelize) => {
   const Order = sequelize.define(
     "order",
     {
-      totalAmount: {
+      status: {
+        type: Sequelize.STRING,
+        enum: ["New", "Invoiced"],
+
+        default: "New",
+      },
+      amount: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
         validate: {
-          notNull: { msg: "totalAmount is required" },
+          notNull: { msg: "amount is required" },
         },
-      },
-      paid: {
-        type: Sequelize.BOOLEAN,
-        defaulValue: false,
       },
     },
     {

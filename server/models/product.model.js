@@ -23,8 +23,35 @@ module.exports = (sequelize, Sequelize) => {
           notNull: { msg: "price is required" },
         },
       },
-      stripe_price: {
+      cost: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        validate: {
+          notNull: { msg: "cost is required" },
+        },
+      },
+      quantity: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "quantity is required" },
+        },
+      },
+
+      type: {
         type: Sequelize.STRING,
+        allowNull: false,
+        enum: ["Product", "Service"],
+        validate: {
+          notNull: { msg: "Product is required" },
+        },
+      },
+      unitOfMeasure: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "unitOfMeasure is required" },
+        },
       },
     },
     {

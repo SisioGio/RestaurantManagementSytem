@@ -9,6 +9,13 @@ module.exports = (sequelize, Sequelize) => {
           notNull: { msg: "country is required" },
         },
       },
+      region: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: "region is required" },
+        },
+      },
       city: {
         type: Sequelize.STRING,
         allowNull: false,
