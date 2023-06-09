@@ -11,7 +11,7 @@ module.exports = (sequelize, Sequelize, orderItemModel) => {
     },
     {}
   );
-
+  // Add items to order
   Order.prototype.addItemsToOrder = async function (listOfItems) {
     // Method to add items to the order
     for (const item of listOfItems) {

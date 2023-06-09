@@ -26,7 +26,7 @@ module.exports = (superClass, sequelize, Sequelize) => {
     },
     {}
   );
-
+  // Create online order with class 'Order' as super class
   OnlineOrder.createWithAbstractClass = async function (
     customerId,
     plannedDateTime,

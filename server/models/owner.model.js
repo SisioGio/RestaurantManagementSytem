@@ -63,13 +63,13 @@ module.exports = (superClass, sequelize, Sequelize, inventory, table) => {
       { where: { id: inventoryId } }
     );
   };
-
+  // Owner deletes inventory
   Owner.prototype.deleteInventory = async function (inventoryId) {
     await inventory.destroy({
       where: { id: inventoryId },
     });
   };
-
+  // Owner adds new table
   Owner.prototype.addTable = async function (capacity) {
     await table.create({
       capacity: capacity,

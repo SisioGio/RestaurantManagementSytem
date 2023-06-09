@@ -18,7 +18,7 @@ module.exports = (superClass, sequelize, Sequelize, timeTracker) => {
   );
 
   Employee.discountPercentage = 0.1;
-
+  // Create employee with abstract class 'User' as super class
   Employee.createWithAbstractClass = async function (
     firstName,
     lastName,
@@ -42,7 +42,7 @@ module.exports = (superClass, sequelize, Sequelize, timeTracker) => {
 
     return employee;
   };
-
+  // Employee starts shifts
   Employee.prototype.clockIn = async function () {
     console.log("Clocking in");
     const timeEntry = await timeTracker.create({
@@ -51,6 +51,7 @@ module.exports = (superClass, sequelize, Sequelize, timeTracker) => {
     timeEntry.setEmployee(this);
     console.log(this.id);
   };
+  // Employee ends shift
   Employee.prototype.clockOut = async function () {
     console.log("Clocking out");
     const timeEntry = await timeTracker.create({

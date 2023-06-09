@@ -31,7 +31,7 @@ module.exports = (superClass, sequelize, Sequelize, onlineOrderModel) => {
 
     return driver;
   };
-
+  // Driver picks order and status changes to 'OUT FOR DELIVERY'
   Driver.prototype.pickUpOrder = async function (onlineOrderId) {
     if (!this.canPickUpDelivery()) {
       throw new Error(
@@ -48,7 +48,7 @@ module.exports = (superClass, sequelize, Sequelize, onlineOrderModel) => {
       console.log("Status of online order must be 'READY'");
     }
   };
-
+  // Driver completes order and status changes to 'DELIVERED' ( )
   Driver.prototype.completeDelivery = async function (onlineOrderId) {
     const onlineOrderObj = await onlineOrderModel.findByPk(onlineOrderId);
     if (onlineOrderObj.status === "OUT FOR DELIVERY") {
@@ -64,7 +64,7 @@ module.exports = (superClass, sequelize, Sequelize, onlineOrderModel) => {
       console.log("Status of online order must be 'READY'");
     }
   };
-
+  // Checks whatever the current driver can pick additional deliveries
   Driver.prototype.canPickUpDelivery = async function () {
     const pendingDeliveries = await this.getOnlineOrders({
       where: { status: "OUT FOR DELIVERY" },

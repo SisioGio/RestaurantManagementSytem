@@ -13,6 +13,7 @@ module.exports = (
       // Other model options go here
     }
   );
+  // Creation of chef class using User as super class
 
   Chef.createWithAbstractClass = async function (
     firsTname,
@@ -37,7 +38,7 @@ module.exports = (
 
     return chef;
   };
-
+  // Check add meal ( menu item)
   Chef.prototype.addMeal = async function (mealName, mealPrice, recipe) {
     const mealObj = await meal.create({
       name: mealName,
@@ -52,7 +53,7 @@ module.exports = (
       });
     });
   };
-
+  // Check updates meal (recipe includes objects of  quantity and inventory item)
   Chef.prototype.updateMeal = async function (
     mealId,
     mealName,
@@ -91,19 +92,19 @@ module.exports = (
       );
     });
   };
-
+  // Chef delets menu item ( meal)
   Chef.prototype.deleteMeal = async function (mealId) {
     console.log("Deleting meal....");
     await meal.destroy({ where: { id: mealId } });
   };
-
+  // Chef starts working on an order item and the status changes to 'PREPARING'
   Chef.prototype.prepareOrderItem = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
 
     orderItemObj.status = "PREPARING";
     await orderItemObj.save();
   };
-
+  // Chef marks order items as 'PREPARED'
   Chef.prototype.markOrderItemAsPrepared = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
     const orderObj = await orderItemObj.getOrder();

@@ -10,7 +10,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DATE,
     },
   });
-
+  // Refresh token creation
   RefreshToken.createToken = async function (user) {
     let expiredAt = new Date();
 

@@ -33,7 +33,7 @@ module.exports = (
     },
     {}
   );
-
+  // Calculates reservation total amount for the bill generation
   Reservation.prototype.getTotalAmount = async function () {
     const onsiteOrders = await this.getOnsiteOrders({
       include: [

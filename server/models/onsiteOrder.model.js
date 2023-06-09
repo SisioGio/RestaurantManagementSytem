@@ -10,7 +10,7 @@ module.exports = (superClass, sequelize, Sequelize, orderItem) => {
     },
     {}
   );
-
+  // Create onsite order with Order class as super class
   OnsiteOrder.createWithAbstractClass = async function (
     waiterId,
     reservationId,

@@ -28,7 +28,7 @@ module.exports = (
     this.points += 1;
     console.log("Customer points increased by one! New points " + this.points);
   };
-
+  // Create customer object using User model as super class
   Customer.createWithAbstractClass = async function (
     firsTname,
     lastName,
@@ -44,32 +44,32 @@ module.exports = (
       phoneNo: phoneNo,
       password: encryptedPassword,
     });
-
+    // Create customer object
     const customer = await Customer.create({});
-
+    //Associate user to the created customer
     await customer.setUser(userObj);
 
     // await customer.setUser(user);
     return customer;
   };
-
+  // Customer creates reservation
   Customer.prototype.makeReservation = async function (attributes) {
     attributes.customerId = this.id;
 
     const reservationObj = await reservationModel.create(attributes);
   };
-
+  // Customer deletes reservation
   Customer.prototype.cancelReservation = async function (reservatoionId) {
     await reservationModel.destroy({ where: { id: reservatoionId } });
   };
-
+  // CUstomer updates reservation
   Customer.prototype.updateReservation = async function (
     reservationId,
     attributes
   ) {
     await reservationModel.update(attributes, { where: { id: reservationId } });
   };
-
+  // Customer creates online order
   Customer.prototype.createOnlineOrder = async function (
     plannedDateTime,
     orderItems
@@ -82,7 +82,7 @@ module.exports = (
 
     return onlineOrderObj;
   };
-
+  // Customer pays online order
   Customer.prototype.payOnlineOrder = async function (
     onlineOrderId,
     transactionAmount,
@@ -97,7 +97,7 @@ module.exports = (
     });
     onlineOrderObj.status = "PAID";
   };
-
+  // Customer leaves review
   Customer.prototype.leaveReview = async function (stars, comment) {
     const reviewObj = await reviewModel.create({
       star: stars,
