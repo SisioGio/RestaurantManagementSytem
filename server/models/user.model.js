@@ -1,28 +1,30 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize, Sequelize, reservationModel) => {
+  var bcrypt = require("bcryptjs");
+  const jwt = require("jsonwebtoken");
+  const config = require("../config/auth.config");
   const User = sequelize.define(
     "user",
     {
-      name: {
+      // Model attributes are defined here
+      firstName: {
         type: Sequelize.STRING,
         allowNull: false,
-        validate: {
-          notNull: { msg: "name is required" },
-        },
       },
-      surname: {
+      lastName: {
         type: Sequelize.STRING,
         allowNull: false,
-        validate: {
-          notNull: { msg: "surname is required" },
-        },
       },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
-        validate: {
-          notNull: { msg: "email is required" },
-        },
+      },
+      phoneNo: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      role: {
+        type: Sequelize.ENUM,
+        values: ["CUSTOMER", "EMPLOYEE"],
       },
       password: {
         type: Sequelize.STRING,
@@ -35,21 +37,38 @@ module.exports = (sequelize, Sequelize) => {
       token: {
         type: Sequelize.STRING,
       },
-      
-      status: {
-        type: Sequelize.STRING,
-        enum: ["Pending", "Active"],
-        default: "Pending",
-      },
-      confirmationCode: {
-        type: Sequelize.STRING,
-        unique: true,
-      },
     },
     {
-      paranoid: true,
+      // Other model options go here
     }
   );
+
+  User.checkIfExists = async function (email) {
+    const userObj = await User.findOne({ where: { email: email } });
+
+    return userObj;
+  };
+
+  User.prototype.passwordIsCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password);
+  };
+  User.prototype.generateAccessToken = async function () {
+    const token = jwt.sign({ id: this._id }, config.secret, {
+      expiresIn: config.jwtExpiration,
+    });
+    return token;
+  };
+  User.prototype.updateObject = async function (data) {
+    await this.update({
+      data,
+    });
+
+    return;
+  };
+
+  User.getAllReservations = async function () {
+    const reservations = reservationModel.findAll();
+  };
 
   return User;
 };

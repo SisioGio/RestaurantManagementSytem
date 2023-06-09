@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1299.0",
+    "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
     "connect-multiparty": "^2.2.0",
     "core-js": "^3.29.1",

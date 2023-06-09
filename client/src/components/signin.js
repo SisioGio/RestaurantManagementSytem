@@ -1,47 +1,21 @@
-import React, { useState } from "react";
-import { DispatchFeedbackContexts } from "../App";
+import { React, useState } from "react";
+import "./../style/signup.css";
+import apiService from "../api/apiService";
+import FormField from "./formField";
 import { Link, Navigate, useLocation } from "react-router-dom";
-import { DispatchUserContexts } from "../App";
+import { DispatchFeedbackContexts } from "../App";
 
-import apiService from "../services/apiService";
 function Signin() {
+  const dispatch = DispatchFeedbackContexts();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
 
   const requestedUrl = params.get("requestedRoute");
-  const dispatch = DispatchFeedbackContexts();
-  const UserDispatcher = DispatchUserContexts();
   const [isSuccess, setIsSuccess] = useState(false);
-  const Login = async (event) => {
-    event.preventDefault();
-    try {
-      let res = await apiService.signin(data);
-
-      dispatch({
-        value: true,
-        message: `Success, you're logged in!`,
-        type: "Success",
-      });
-      console.log(res);
-      UserDispatcher({
-        authenticated: true,
-        data: res.data,
-        companies: res.data.companies,
-      });
-
-      setIsSuccess(true);
-    } catch (err) {
-      console.log(err);
-      dispatch({
-        value: true,
-        message: err.response.data.message
-          ? err.response.data.message
-          : "Error",
-        type: "Error",
-      });
-    }
-  };
-
+  const [formErrors, setFormErrors] = useState({
+    email: "",
+    password: "",
+  });
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -57,8 +31,45 @@ function Signin() {
     }));
   }
 
+  const submitForm = async (event) => {
+    const errors = {};
+
+    if (!data.email) {
+      errors.email = "Email is required";
+    }
+
+    if (!data.password) {
+      errors.password = "Password is required";
+    }
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      console.log(data);
+      try {
+        const res = await apiService.signin(data);
+
+        dispatch({
+          value: true,
+          message: `Welcome!`,
+          type: "Success",
+        });
+        setIsSuccess(true);
+      } catch (err) {
+        console.log(err);
+        dispatch({
+          value: true,
+          message: err.response.data.message
+            ? err.response.data.message
+            : "Error",
+          type: "Error",
+        });
+      }
+    }
+  };
+
   return (
-    <div id="signin" className="full-screen bg-1">
+    <div className="signup">
       {isSuccess ? (
         requestedUrl ? (
           <Navigate to={"/" + requestedUrl} />
@@ -66,48 +77,36 @@ function Signin() {
           <Navigate to="/" />
         )
       ) : null}
-      <form className="w-50 center rounded border p-5">
-        <div class="row">
-          <div class=" col-12">
-            <label for="inputEmail4">Email</label>
-            <input
-              type="email"
-              name="email"
-              onChange={handleChange}
-              value={data.email}
-              required
-              class="form-control"
-              id="inputEmail4"
-              placeholder="Email"
-            ></input>
-          </div>
-          <div class=" col-12">
-            <label for="inputPassword4">Password</label>
-            <input
-              type="password"
-              required
-              name="password"
-              onChange={handleChange}
-              value={data.password}
-              class="form-control"
-              id="inputPassword4"
-              placeholder="Password"
-            ></input>
-          </div>
-        </div>
 
-        <button
-          onClick={(event) => Login(event)}
-          type="submit"
-          class="btn btn-primary btn-lg btn-block m-2 w-100"
-        >
-          Sign In
-        </button>
+      <div className="form">
+        <h2>Sign In</h2>
+        <form onSubmit="">
+          <FormField
+            name="email"
+            value={data.email}
+            placeHolder="Email"
+            handleChange={handleChange}
+            error={formErrors.email}
+            type="email"
+          />
+          <FormField
+            name="password"
+            value={data.password}
+            placeHolder="Password"
+            handleChange={handleChange}
+            error={formErrors.password}
+            type="password"
+          />
 
-        <Link to="/signup">
-          <small>Need an account? Sign Up!</small>
-        </Link>
-      </form>
+          <button type="button" onClick={submitForm}>
+            Sign In
+          </button>
+
+          <small>
+            Already have an account? <Link to="/signup"> Sign Up!</Link>{" "}
+          </small>
+        </form>
+      </div>
     </div>
   );
 }

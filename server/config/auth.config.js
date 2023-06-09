@@ -1,7 +1,7 @@
 module.exports = {
   secret: "sdfsdfsfgsdvgdsfvdfvsdfvsdfbds",
 
-  jwtExpiration: 100000,
+  jwtExpiration: 1,
   jwtRefreshExpiration: 250000000,
 
   GMAIL_PASSWORD: "CMSPROJECTS21285",

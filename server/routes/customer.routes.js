@@ -1,24 +1,33 @@
 module.exports = (app) => {
   const customer = require("../controllers/customer.controller.js");
-  const { authJwt } = require("../middleware");
+  const { authJwt } = require("../middleware/index.js");
   var router = require("express").Router();
 
-  // Create a new customer
-  router.post("/", customer.create);
+  // Create a new user
+  router.post("/", customer.register);
 
-  // Update an customer
-  router.put("/", customer.update);
+  // Try to get new accessToken using refreshToken
+  router.post("/refreshToken", customer.refreshToken);
 
-  // Retrieve all customer
-  router.get("/", customer.findAll);
-  // Retrieve all customer
-  router.get(`/:vendorId`, customer.getVendorCustomers);
+  // Login
+  router.post("/login", customer.login);
+  router.get(
+    "/is_authenticated",
+    [authJwt.verifyToken],
+    customer.isAuthenticated
+  );
 
-  // Delete an customer with id
-  router.delete("/:id", customer.delete);
+  // // Update an user
+  // router.put("/", user.update);
 
-  // Delete all customers
-  router.delete("/", customer.deleteAll);
+  // // Retrieve all user
+  // router.get("/",  user.findAll);
 
-  app.use("/api/customer", router);
+  // // Delete an user with id
+  // router.delete("/:id", user.delete);
+
+  // // Delete all users
+  // router.delete("/",  user.deleteAll);
+
+  app.use("/api/user", router);
 };

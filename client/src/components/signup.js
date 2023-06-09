@@ -1,41 +1,32 @@
-
-import React, { useState } from "react";
-import apiService from "../services/apiService";
-import './../style/login.css'
-import { DispatchFeedbackContexts } from "../App";
+import { React, useState } from "react";
+import "./../style/signup.css";
+import apiService from "../api/apiService";
+import FormField from "./formField";
 import { Link, Navigate } from "react-router-dom";
-function Signup() {
-    const dispatch = DispatchFeedbackContexts();
-    const [isSuccess, setIsSuccess] = useState(false);
-    const CreateCompany = async (event) =>{
-      event.preventDefault()
-        try{
-            await apiService.signup(data)
-            dispatch({
-                value: true,
-                message: `Success, your account has been created, please login.`,
-                type: "Success",
-              });
-              setIsSuccess(true)
-        } catch(err){
-            console.log(err)
-            dispatch({
-                value: true,
-                message: err.response.data.message
-                  ? err.response.data.message
-                  : "Error",
-                type: "Error",
-              });
-        }
-    }
+import { DispatchFeedbackContexts } from "../App";
 
- const [data, setData] = useState({
+function Signup() {
+  const dispatch = DispatchFeedbackContexts();
+
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [formErrors, setFormErrors] = useState({
     name: "",
     surname: "",
     email: "",
-    password: ""
+    password: "",
+    repeatPassword: "",
+    phoneNo: "",
   });
-  
+
+  const [data, setData] = useState({
+    name: "",
+    surname: "",
+    email: "",
+    password: "",
+    repeatPassword: "",
+    phoneNo: "",
+  });
+
   function handleChange(event) {
     const { value, name } = event.target;
 
@@ -45,73 +36,127 @@ function Signup() {
       [name]: value,
     }));
   }
-    return (
-       <div id="signup" className='full-screen bg-1'>
 
-{isSuccess ? <Navigate to="/signin" /> : null}
-        <form className='w-50 center rounded border p-5'>
-        <div class="row">
-        <div class="col-md-6">
-    <label for="inputName">Name</label>
-    <input  type="text"  name='name' onChange={handleChange} value ={data.name} required class="form-control" id="inputName" placeholder="Alessio"></input>
-    </div>
-    <div class="col-md-6">
-    <label for="inputSurname">Surname</label>
-    <input type="text" required class="form-control" name='surname' onChange={handleChange} value ={data.surname} id="inputCompanyVat" placeholder="Giovannini"></input>
-    </div>
-  
-  </div>
+  const submitForm = async (event) => {
+    const errors = {};
+    if (!data.name) {
+      errors.name = "Name is required";
+    }
+    if (!data.surname) {
+      errors.surname = "Surname is required";
+    }
+    if (!data.email) {
+      errors.email = "Email is required";
+    }
+    if (!data.phoneNo) {
+      errors.phoneNo = "Phone No. is required";
+    }
+    if (!data.password) {
+      errors.password = "Password is required";
+    }
+    if (!data.password) {
+      errors.repeatPassword = "Repeat password is required";
+    }
+    if (
+      data.password &&
+      data.repeatPassword &&
+      data.password != data.repeatPassword
+    ) {
+      errors.password = "Passwords do not match";
+    }
+    setFormErrors(errors);
 
+    if (Object.keys(errors).length === 0) {
+      try {
+        const res = await apiService.signup(data);
+        setIsSuccess(true);
+        dispatch({
+          value: true,
+          message: `Your account has been created!`,
+          type: "Success",
+        });
+      } catch (err) {
+        console.log(err);
+        dispatch({
+          value: true,
+          message: err.response.data.message
+            ? err.response.data.message
+            : "Error",
+          type: "Error",
+        });
+      }
+    }
+  };
 
-  <div class="row">
-    <div class=" col-md-6">
-      <label for="inputEmail4">Email</label>
-      <input type="email" name='email' onChange={handleChange} value ={data.email} required class="form-control" id="inputEmail4" placeholder="Email"></input>
-    </div>
-    <div class=" col-md-6">
-      <label for="inputPassword4">Password</label>
-      <input type="password" required  name='password' onChange={handleChange} value ={data.password} class="form-control" id="inputPassword4" placeholder="Password"></input>
-    </div>
-  </div>
+  return (
+    <div className="signup">
+      {isSuccess ? <Navigate to="/signin" /> : null}
 
-{/* 
+      <div className="form">
+        <h2>Sign Up</h2>
+        <form onSubmit="">
+          <FormField
+            name="name"
+            value={data.name}
+            placeHolder="Name"
+            handleChange={handleChange}
+            error={formErrors.name}
+            type="text"
+          />
 
-  <div class="row">
-    <div className="col-6">
-    <label for="inputCountry">Country</label>
-    <input type="text" required class="form-control" id="inputCountry" placeholder="Italy"></input>
-    </div>
-    <div className="col-4">
-    <label for="inputRegion">Region</label>
-    <input type="text" required class="form-control" id="inputRegion" placeholder="Lazio"></input>
-    </div>
-    <div className="col-2">
-    <label for="inputPostCode">Post Code</label>
-    <input type="text" required class="form-control" id="inputPostCode" placeholder="01-100"></input>
-    </div>
-  </div>
-  <div class="row">
-    <div className="col-6">
-    <label for="inputCity">City</label>
-    <input type="text" required class="form-control" id="inputCity" placeholder="Viterbo"></input>
-    </div>
-    <div className="col-4">
-    <label for="inputStreet">Street</label>
-    <input type="text"  required class="form-control" id="inputStreet" placeholder="S. Agostino"></input>
-    </div>
-    <div className="col-2">
-    <label for="inputStreetNo">Street No.</label>
-    <input type="text" required class="form-control" id="inputStreetNo" placeholder="42/A"></input>
-    </div>
-  </div> */}
+          <FormField
+            name="surname"
+            value={data.surname}
+            placeHolder="Surname"
+            handleChange={handleChange}
+            error={formErrors.surname}
+            type="text"
+          />
+          <FormField
+            name="phoneNo"
+            value={data.phoneNo}
+            placeHolder="Phone Number"
+            handleChange={handleChange}
+            error={formErrors.phoneNo}
+            type="text"
+          />
+          <FormField
+            name="email"
+            value={data.email}
+            placeHolder="Email"
+            handleChange={handleChange}
+            error={formErrors.email}
+            type="email"
+          />
+          <FormField
+            name="password"
+            value={data.password}
+            placeHolder="Password"
+            handleChange={handleChange}
+            error={formErrors.password}
+            type="password"
+          />
 
-  <button  onClick={event =>CreateCompany(event)} type="submit" class="btn btn-primary btn-lg btn-block m-2 w-100">Sign Up</button>
-  <Link to='/signin'><small>Need an account? Sign In!</small></Link>
-</form>
-       </div>
-    );
-  }
-  
-  export default Signup;
-  
-  
+          <FormField
+            name="repeatPassword"
+            value={data.repeatPassword}
+            placeHolder="RepeatPassword"
+            handleChange={handleChange}
+            error={formErrors.repeatPassword}
+            type="password"
+          />
+
+          <button type="button" onClick={submitForm}>
+            Sign Up
+          </button>
+
+          <small>
+            Need an account? <Link to="/signin"> Sign In!</Link>{" "}
+          </small>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default Signup;
