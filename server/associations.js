@@ -89,7 +89,6 @@ module.exports = {
     db.order.belongsTo(db.onsiteOrder, {
       foreignKey: "refId",
       constraints: false,
-      onDelete: "cascade",
     });
     // Employee - timeTracker
     db.employee.hasMany(db.timeTracker, { onDelete: "cascade" });
@@ -98,15 +97,29 @@ module.exports = {
     db.menuItem.belongsToMany(db.inventory, {
       through: db.ingredient,
       onDelete: "cascade",
+      constraints: false,
     });
     db.inventory.belongsToMany(db.menuItem, {
       through: db.ingredient,
       onDelete: "cascade",
+      constraints: false,
     });
-    db.menuItem.hasMany(db.ingredient, { onDelete: "cascade" });
-    db.ingredient.belongsTo(db.menuItem, { onDelete: "cascade" });
-    db.inventory.hasMany(db.ingredient, { onDelete: "cascade" });
-    db.ingredient.belongsTo(db.inventory, { onDelete: "cascade" });
+    db.menuItem.hasMany(db.ingredient, {
+      onDelete: "cascade",
+      constraints: false,
+    });
+    db.ingredient.belongsTo(db.menuItem, {
+      onDelete: "cascade",
+      constraints: false,
+    });
+    db.inventory.hasMany(db.ingredient, {
+      onDelete: "cascade",
+      constraints: false,
+    });
+    db.ingredient.belongsTo(db.inventory, {
+      onDelete: "cascade",
+      constraints: false,
+    });
 
     // Customer-Table ( M:N on Reservations)
     db.customer.belongsToMany(db.tableMdl, {

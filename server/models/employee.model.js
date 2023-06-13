@@ -44,12 +44,10 @@ module.exports = (superClass, sequelize, Sequelize, timeTracker) => {
   };
   // Employee starts shifts
   Employee.prototype.clockIn = async function () {
-    console.log("Clocking in");
     const timeEntry = await timeTracker.create({
       activity: "IN",
     });
     timeEntry.setEmployee(this);
-    console.log(this.id);
   };
   // Employee ends shift
   Employee.prototype.clockOut = async function () {

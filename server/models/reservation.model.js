@@ -30,6 +30,18 @@ module.exports = (sequelize, Sequelize) => {
     { paranoid: false }
   );
 
+  Reservation.checkAvailability = async function (slotId, tableId, date) {
+    const { slot, tableMdl } = require("./../models");
+
+    const counter = await Reservation.count({
+      where: {
+        slotId: slotId,
+        tableId: tableId,
+        date: date,
+      },
+    });
+    return counter === 0;
+  };
   Reservation.deleteReservation = async function (reservationId) {
     const reservation = await Reservation.findByPk(reservationId);
     await reservation.destroy();
@@ -47,13 +59,22 @@ module.exports = (sequelize, Sequelize) => {
         },
       ],
     });
-    console.log(JSON.stringify(onsiteOrders));
+
     var totalAmount = 0;
-    onsiteOrders.every((order) => {
-      order.order.orderItems.every((orderItem) => {
-        totalAmount += orderItem.quantity * orderItem.menuItem.price;
-      });
-    });
+    for (const orderItem of onsiteOrders) {
+      // Check if order is completed
+      if (orderItem.status !== "COMPLETED") {
+        throw Error(
+          "Cannot generate total amount. Not all orders have status 'COMPLETED'"
+        );
+      }
+      for (const item of orderItem.order.orderItems) {
+        const quantity = item.quantity;
+        const price = item.menuItem.price;
+        const itemTotal = quantity * price;
+        totalAmount += parseFloat(itemTotal);
+      }
+    }
     return totalAmount;
   };
 

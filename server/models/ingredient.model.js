@@ -12,7 +12,9 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
       },
     },
-    {}
+    {
+      paranoid: false,
+    }
   );
 
   return Ingredient;

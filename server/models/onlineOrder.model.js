@@ -33,18 +33,35 @@ module.exports = (sequelize, Sequelize) => {
     orderItems
   ) {
     const { order } = require("./../models");
-    const superObj = await order.create({});
-    const onlineOrder = await OnlineOrder.create({
-      customerId: customerId,
-      plannedDateTime: plannedDateTime,
-    });
+    let transaction;
+    try {
+      transaction = await sequelize.transaction();
 
-    await onlineOrder.setOrder(superObj);
+      const superObj = await order.create({}, { transaction });
 
-    if (Array.isArray(orderItems)) {
-      await superObj.addItemsToOrder(orderItems);
+      const onlineOrder = await OnlineOrder.create(
+        {
+          customerId: customerId,
+          plannedDateTime: plannedDateTime,
+        },
+        { transaction }
+      );
+
+      await onlineOrder.setOrder(superObj, { transaction });
+
+      if (Array.isArray(orderItems)) {
+        await superObj.addItemsToOrder(orderItems, transaction);
+      }
+      await transaction.commit();
+
+      return onlineOrder;
+    } catch (err) {
+      if (transaction) {
+        await transaction.rollback();
+      }
+
+      throw Error(err.message);
     }
-    return onlineOrder;
   };
 
   return OnlineOrder;

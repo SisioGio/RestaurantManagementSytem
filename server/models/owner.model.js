@@ -80,6 +80,12 @@ module.exports = (
       { where: { id: inventoryId } }
     );
   };
+
+  Owner.prototype.addSlot = async function (attributes) {
+    const { slot } = require("./../models");
+
+    return await slot.create(attributes);
+  };
   // Owner deletes inventory
   Owner.prototype.deleteInventory = async function (inventoryId) {
     await inventory.destroy({

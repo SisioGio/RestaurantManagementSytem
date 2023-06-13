@@ -38,6 +38,24 @@ module.exports = (
 
     return waiter;
   };
+  Waiter.prototype.confirmReservation = async function (reservationId) {
+    const { reservation } = require("./../models");
+    const reservationObj = await reservation.findByPk(reservationId);
+    if (reservationObj) {
+      reservationObj.status = "CONFIRMED";
+      await reservationObj.save();
+    }
+  };
+
+  Waiter.prototype.initializeReservation = async function (reservationId) {
+    const { reservation } = require("./../models");
+    const reservationObj = await reservation.findByPk(reservationId);
+    if (reservationObj) {
+      reservationObj.status = "PROCESSING";
+      await reservationObj.save();
+    }
+  };
+
   // Creates on site order when customer arrives
   Waiter.prototype.createOnSiteOrder = async function (attributes) {
     attributes.waiterId = this.id;
@@ -50,6 +68,10 @@ module.exports = (
   // Removes order item
   Waiter.prototype.removeItemFromOrder = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
+    if (!orderItemObj) {
+      throw Error(`Order item with ID =${orderItemId} not found`);
+    }
+
     if (orderItemObj.status === "NEW") {
       orderItemObj.status = "CANCELED";
       await orderItemObj.save();
@@ -63,8 +85,10 @@ module.exports = (
     quantity
   ) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
+    if (!orderItemObj) {
+      throw Error(`Order item with ID =${orderItemId} not found`);
+    }
 
-    console.log(quantity);
     if (orderItemObj.status === "NEW") {
       orderItemObj.quantity = quantity;
       await orderItemObj.save();
@@ -83,6 +107,15 @@ module.exports = (
   // Marks order item as 'COMPLETED' ( when it's served)
   Waiter.prototype.serveOrderItem = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
+    if (!orderItemObj) {
+      throw Error(`Order item with ID ${orderItemObj.id} not found`);
+    }
+
+    if (orderItemObj.status !== "READY") {
+      throw Error(
+        `To set as 'COMPLETED' an order item its status must be 'READY' but it's ${orderItemObj.status}`
+      );
+    }
     const orderObj = await orderItemObj.getOrder();
     if (orderObj.type === "ONSITE") {
       if (orderItemObj.status === "READY") {
@@ -90,7 +123,7 @@ module.exports = (
         await orderItemObj.save();
         const superOrderObj = await orderItemObj.getOrder();
 
-        superOrderObj.checkIfCompleted();
+        await superOrderObj.checkIfCompleted();
       } else {
         console.log(
           "Cannot update order item with status '",
@@ -102,6 +135,7 @@ module.exports = (
       console.log("Online orders cannot be served!");
     }
   };
+
   // Generates bill
   Waiter.prototype.generateBill = async function (reservationId, paymentType) {
     const reservationObj = await reservationModel.findByPk(reservationId);
@@ -116,24 +150,6 @@ module.exports = (
 
     reservationObj.status = "COMPLETED";
     await reservationObj.save();
-  };
-
-  Waiter.prototype.confirmReservation = async function (reservationId) {
-    const { reservation } = require("./../models");
-    const reservationObj = await reservation.findByPk(reservationId);
-    if (reservationObj) {
-      reservationObj.status = "CONFIRMED";
-      await reservationObj.save();
-    }
-  };
-
-  Waiter.prototype.initializeReservation = async function (reservationId) {
-    const { reservation } = require("./../models");
-    const reservationObj = await reservation.findByPk(reservationId);
-    if (reservationObj) {
-      reservationObj.status = "PROCESSING";
-      await reservationObj.save();
-    }
   };
 
   return Waiter;

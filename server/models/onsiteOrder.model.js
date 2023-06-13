@@ -25,14 +25,24 @@ module.exports = (sequelize, Sequelize) => {
       reservationId: reservationId,
       status: status,
     });
-    await onsiteOrder.setOrder(superObj);
+    let transaction;
+    try {
+      transaction = await sequelize.transaction();
 
-    // Add items if any
-    if (Array.isArray(orderItems)) {
-      await superObj.addItemsToOrder(orderItems);
+      await onsiteOrder.setOrder(superObj, { transaction });
+
+      // Add items if any
+      if (Array.isArray(orderItems)) {
+        await superObj.addItemsToOrder(orderItems, transaction);
+      }
+      await transaction.commit();
+      return onsiteOrder;
+    } catch (err) {
+      if (transaction) {
+        await transaction.rollback();
+      }
+      throw new Error(err.message);
     }
-
-    return onsiteOrder;
   };
 
   return OnsiteOrder;

@@ -9,19 +9,32 @@ module.exports = (sequelize, Sequelize) => {
         values: ["ONLINE", "ONSITE"],
       },
     },
-    {}
+    { paranoid: false }
   );
   // Add items to order
-  Order.prototype.addItemsToOrder = async function (listOfItems) {
+  Order.prototype.addItemsToOrder = async function (listOfItems, transaction) {
     // Method to add items to the order
-    const { orderItem } = require("./../models");
+    const { orderItem, menuItem } = require("./../models");
 
     for (const item of listOfItems) {
-      await orderItem.create({
-        orderId: this.id,
-        menuItemId: item.menuItemId,
-        quantity: item.quantity,
+      var checkMenuItem = await menuItem.findOne({
+        where: { id: item.menuItemId },
+        transaction,
       });
+      if (checkMenuItem === null) {
+        throw Error("No menu item was found");
+      }
+      if (item.quantity <= 0 || item.quantity > 30) {
+        throw Error("Menu item quantity must be between 1 and 30 (incl)");
+      }
+      await orderItem.create(
+        {
+          orderId: this.id,
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+        },
+        { transaction }
+      );
     }
   };
   Order.prototype.getChild = async function () {
@@ -47,7 +60,6 @@ module.exports = (sequelize, Sequelize) => {
         );
       });
 
-      console.log("Order is completed? ", isCompleted.toString());
       if (isCompleted) {
         childOrder.status = "COMPLETED";
         await childOrder.save();

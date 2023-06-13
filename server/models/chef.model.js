@@ -54,7 +54,7 @@ module.exports = (
       price: mealPrice,
       categoryId: categoryId,
     });
-    console.log("Meal object ID ", mealObj.id);
+
     for (const ingredientItem of recipe) {
       await ingredient.create({
         quantityNeeded: ingredientItem.quantityNeeded,
@@ -62,6 +62,8 @@ module.exports = (
         inventoryId: ingredientItem.inventoryId,
       });
     }
+
+    return mealObj;
   };
   // Check updates meal (recipe includes objects of  quantity and inventory item)
   Chef.prototype.updateMeal = async function (
@@ -85,22 +87,15 @@ module.exports = (
     // Check if recipe was provided
     if (recipe.length === 0) return;
 
-    recipe.forEach(async (x) => {
-      // upsert -> Update or create row
-      await ingredient.upsert(
-        {
-          mealId: mealId,
-          inventoryId: x.inventoryId,
-          quantityNeeded: x.quantityNeeded,
-        },
-        {
-          where: {
-            mealId: mealId,
-            inventoryId: x.inventoryId,
-          },
-        }
-      );
-    });
+    await ingredient.destroy({ where: { menuItemId: mealId } });
+
+    for (const ingredientObj of recipe) {
+      await ingredient.create({
+        menuItemId: mealId,
+        inventoryId: ingredientObj.inventoryId,
+        quantityNeeded: ingredientObj.quantityNeeded,
+      });
+    }
   };
   // Chef delets menu item ( meal)
   Chef.prototype.deleteMeal = async function (mealId) {
@@ -110,8 +105,16 @@ module.exports = (
   // Chef starts working on an order item and the status changes to 'PREPARING'
   Chef.prototype.prepareOrderItem = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
+    if (!orderItemObj) {
+      throw Error(`Order item with ID ${orderItemModel} not found`);
+    }
     const orderObj = await orderItemObj.getOrder();
     const childOrder = await orderObj.getChild();
+
+    if (!childOrder.status === "NEW") {
+      throw Error(`Cannot update order item with status ${childOrder.status}`);
+    }
+
     childOrder.status = "IN_PROGRESS";
     orderItemObj.status = "PREPARING";
     await orderItemObj.save();
@@ -120,7 +123,17 @@ module.exports = (
   // Chef marks order items as 'PREPARED'
   Chef.prototype.markOrderItemAsPrepared = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
+    if (!orderItemObj) {
+      throw Error(`Order item with ID ${orderItemObj.id} not found`);
+    }
+
+    if (orderItemObj.status !== "PREPARING") {
+      throw Error(
+        `To set as 'READY' an order item its status must be 'PREPARING' but it's ${orderItemObj.status}`
+      );
+    }
     const orderObj = await orderItemObj.getOrder();
+
     orderItemObj.status = "READY";
     await orderItemObj.save();
     if (orderObj.type === "ONLINE") {

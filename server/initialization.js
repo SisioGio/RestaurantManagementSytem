@@ -54,6 +54,7 @@ module.exports = {
     const desserts = await owner.addCategory("DESSERTS", 5);
     const beverages = await owner.addCategory("BEVERAGES", 6);
     const specials = await owner.addCategory("SPECIALS", 7);
+
     // const onsiteOrder = await db.onsiteOrder.createWithAbstractClass();
 
     // const employObj = await waiter.getEmployee();
@@ -243,19 +244,19 @@ module.exports = {
     await owner.addTable(8);
     await owner.addTable(10);
 
-    await db.slot.create({
+    await owner.addSlot({
       start: moment("12:00", "HH:mm").format("HH:mm"),
       end: moment("15:00", "HH:mm").format("HH:mm"),
     });
-    await db.slot.create({
+    await owner.addSlot({
       start: moment("15:00", "HH:mm").format("HH:mm"),
       end: moment("18:00", "HH:mm").format("HH:mm"),
     });
-    await db.slot.create({
+    await owner.addSlot({
       start: moment("18:00", "HH:mm").format("HH:mm"),
       end: moment("21:00", "HH:mm").format("HH:mm"),
     });
-    await db.slot.create({
+    await owner.addSlot({
       start: moment("21:00", "HH:mm").format("HH:mm"),
       end: moment("24:00", "HH:mm").format("HH:mm"),
     });
@@ -275,10 +276,6 @@ module.exports = {
       slotId: 2,
       tableId: 2,
     });
-
-    // await customer.updateReservation(1, {
-    //   numberOfPeople: 6,
-    // });
 
     // await customer.cancelReservation(2);
     // var arrayOfMenuItems = [1, 2];

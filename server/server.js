@@ -40,7 +40,7 @@ const db = require("./../server/models");
 createAssociations(db);
 
 db.sequelize
-  .authenticate({ force: true })
+  .sync({ force: true })
   .then(async () => {
     // Initialize dataset
     // initializeDatabase(db, db.sequelize);
@@ -84,3 +84,5 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
+
+exports.db = db;

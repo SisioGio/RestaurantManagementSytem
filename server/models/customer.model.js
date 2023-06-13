@@ -1,3 +1,5 @@
+const db = require("./../models");
+
 module.exports = (
   user,
   sequelize,
@@ -13,6 +15,7 @@ module.exports = (
   var bcrypt = require("bcryptjs");
   const jwt = require("jsonwebtoken");
   const config = require("../config/auth.config");
+  const moment = require("moment");
   const Customer = sequelize.define(
     "customer",
     {
@@ -88,27 +91,63 @@ module.exports = (
   };
   // Customer deletes reservation
   Customer.prototype.cancelReservation = async function (reservatoionId) {
-    await reservationModel.destroy({ where: { id: reservatoionId } });
+    const { orderItem, order, reservation } = require("./../models");
+    // var reservationObj =  await reservation.findByPk(reservatoionId)
+    // var orders = await reservation.getOrders()
+    var reservationObj = await reservation.findByPk(reservatoionId);
+    if (!reservation) {
+      throw Error("Reservation not found");
+    }
+    var onsiteOrders = await reservationObj.getOnsiteOrders();
+    for (const onsiteOrderObj of onsiteOrders) {
+      var orderObj = await onsiteOrderObj.getOrder();
+
+      await orderObj.destroy();
+    }
+
+    await reservation.destroy({ where: { id: reservatoionId } });
+
+    // await orderItem.destroy({where:{orderId}})
   };
-  // CUstomer updates reservation
-  Customer.prototype.updateReservation = async function (
-    reservationId,
-    attributes
-  ) {
-    await reservationModel.update(attributes, { where: { id: reservationId } });
-  };
-  // Customer creates online order
+
+  // Customer creates online order (thid service provider handles the only payment by sending a transaction hash in the callback url)
   Customer.prototype.createOnlineOrder = async function (
     plannedDateTime,
-    orderItems
+    orderItems,
+    transactionAmount,
+    transactionHash
   ) {
-    const onlineOrderObj = await onlineOrderModel.createWithAbstractClass(
-      this.id,
-      plannedDateTime,
-      orderItems
-    );
+    let transaction;
+    try {
+      transaction = await sequelize.transaction();
 
-    return onlineOrderObj;
+      if (moment().isAfter(plannedDateTime)) {
+        throw Error("Cannot create reservation for past date");
+      }
+      if (!orderItems || orderItems.length === 0) {
+        throw Error("Online order must have at least one menu item");
+      }
+      const onlineOrderObj = await onlineOrderModel.createWithAbstractClass(
+        this.id,
+        plannedDateTime,
+        orderItems
+      );
+
+      await this.payOnlineOrder(
+        onlineOrderObj.id,
+
+        transactionAmount,
+        transactionHash
+      );
+
+      await transaction.commit();
+      return onlineOrderObj;
+    } catch (err) {
+      if (transaction) {
+        await transaction.rollback();
+      }
+      throw Error(err.message);
+    }
   };
   // Customer pays online order
   Customer.prototype.payOnlineOrder = async function (
@@ -116,7 +155,24 @@ module.exports = (
     transactionAmount,
     transactionHash
   ) {
+    const { menuItem } = require("./../models");
     const onlineOrderObj = await onlineOrderModel.findByPk(onlineOrderId);
+    const orderObj = await onlineOrderObj.getOrder();
+    const orderItems = await orderObj.getOrderItems({ include: menuItem });
+    var totalAmount = 0;
+
+    for (const item of orderItems) {
+      const quantity = item.quantity;
+      const price = item.menuItem.price;
+      const itemTotal = quantity * price;
+      totalAmount += parseFloat(itemTotal);
+    }
+
+    if (parseFloat(totalAmount) !== parseFloat(transactionAmount)) {
+      throw Error(
+        `Transaction amount does not match order amount (${totalAmount})`
+      );
+    }
     const onlinePaymentObj = await onlinePaymentModel.create({
       totalAmount: transactionAmount,
       transactionHash: transactionHash,
