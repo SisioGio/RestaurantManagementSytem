@@ -89,43 +89,67 @@ module.exports = {
     db.order.belongsTo(db.onsiteOrder, {
       foreignKey: "refId",
       constraints: false,
+      onDelete: "cascade",
     });
     // Employee - timeTracker
-    db.employee.hasMany(db.timeTracker);
-    db.timeTracker.belongsTo(db.employee);
+    db.employee.hasMany(db.timeTracker, { onDelete: "cascade" });
+    db.timeTracker.belongsTo(db.employee, { onDelete: "cascade" });
     // Meal-Inventory ( M:N on Ingredients)
-    db.menuItem.belongsToMany(db.inventory, { through: db.ingredient });
-    db.inventory.belongsToMany(db.menuItem, { through: db.ingredient });
-    db.menuItem.hasMany(db.ingredient);
-    db.ingredient.belongsTo(db.menuItem);
-    db.inventory.hasMany(db.ingredient);
-    db.ingredient.belongsTo(db.inventory);
+    db.menuItem.belongsToMany(db.inventory, {
+      through: db.ingredient,
+      onDelete: "cascade",
+    });
+    db.inventory.belongsToMany(db.menuItem, {
+      through: db.ingredient,
+      onDelete: "cascade",
+    });
+    db.menuItem.hasMany(db.ingredient, { onDelete: "cascade" });
+    db.ingredient.belongsTo(db.menuItem, { onDelete: "cascade" });
+    db.inventory.hasMany(db.ingredient, { onDelete: "cascade" });
+    db.ingredient.belongsTo(db.inventory, { onDelete: "cascade" });
 
     // Customer-Table ( M:N on Reservations)
-    db.customer.belongsToMany(db.tableMdl, { through: db.reservation });
-    db.tableMdl.belongsToMany(db.customer, { through: db.reservation });
-    db.customer.hasMany(db.reservation);
-    db.reservation.belongsTo(db.customer);
-    db.tableMdl.hasMany(db.reservation);
-    db.reservation.belongsTo(db.tableMdl);
+    db.customer.belongsToMany(db.tableMdl, {
+      through: { model: db.reservation, unique: false, onDelete: "cascade" },
+
+      constraints: false,
+    });
+    db.tableMdl.belongsToMany(db.customer, {
+      through: { model: db.reservation, unique: false, onDelete: "cascade" },
+
+      constraints: false,
+    });
+    db.customer.hasMany(db.reservation, { onDelete: "cascade" });
+    db.reservation.belongsTo(db.customer, { onDelete: "cascade" });
+    db.tableMdl.hasMany(db.reservation, { onDelete: "cascade" });
+    db.reservation.belongsTo(db.tableMdl, { onDelete: "cascade" });
     // Reservation - Slot
-    db.slot.hasMany(db.reservation);
-    db.reservation.belongsTo(db.slot);
+    db.slot.hasMany(db.reservation, { onDelete: "cascade" });
+    db.reservation.belongsTo(db.slot, { onDelete: "cascade" });
 
     // Order - menuItem ( M:N on OrderMeals)
-    db.order.belongsToMany(db.menuItem, { through: db.orderItem });
-    db.menuItem.belongsToMany(db.order, { through: db.orderItem });
-    db.order.hasMany(db.orderItem);
-    db.orderItem.belongsTo(db.order);
-    db.menuItem.hasMany(db.orderItem);
-    db.orderItem.belongsTo(db.menuItem);
+    db.order.belongsToMany(db.menuItem, {
+      through: db.orderItem,
+      onDelete: "cascade",
+    });
+    db.menuItem.belongsToMany(db.order, {
+      through: db.orderItem,
+      onDelete: "cascade",
+    });
+    db.order.hasMany(db.orderItem, { onDelete: "cascade" });
+    db.orderItem.belongsTo(db.order, { onDelete: "cascade" });
+    db.menuItem.hasMany(db.orderItem, { onDelete: "cascade" });
+    db.orderItem.belongsTo(db.menuItem, { onDelete: "cascade" });
 
     // Waiter -  OnsiteOrder ( 1 to many)
     db.waiter.hasMany(db.onsiteOrder);
     db.onsiteOrder.belongsTo(db.waiter);
 
     // Reservation  - OnsiteOrder (1:N)
-    db.reservation.hasMany(db.onsiteOrder);
+    db.reservation.hasMany(db.onsiteOrder, {
+      onDelete: "CASCADE",
+      hooks: true,
+    });
     db.onsiteOrder.belongsTo(db.reservation);
 
     // Customer - OnlineOrder (1:N)
@@ -159,5 +183,9 @@ module.exports = {
     // user - refreshToken
     db.user.hasMany(db.refreshToken, { onDelete: "RESTRICT" });
     db.refreshToken.belongsTo(db.user, { onDelete: "RESTRICT" });
+
+    // Menu item - category
+    db.category.hasMany(db.menuItem);
+    db.menuItem.belongsTo(db.category);
   },
 };

@@ -1,0 +1,73 @@
+@import "./theme.css";
+.menu {
+  background: var(--secondary-color);
+  border-radius: 24px;
+  border: 1px solid #cdcdcd;
+  padding: 1.5rem;
+}
+.menu-category h3 {
+  text-align: start;
+}
+.item-ingredients {
+  position: absolute;
+  background: var(--dark-color);
+  top: 100%;
+  right: 0;
+  border: 12px;
+  /* box-sizing: unset; */
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  color: var(--background-color);
+  opacity: 1;
+  z-index: 1;
+  right: 50%;
+  transform: translateX(50%);
+}
+p {
+  white-space: nowrap;
+}
+.item-ingredients div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.text-start {
+  text-align: start;
+}
+.quantitySelection {
+  position: absolute;
+  color: var(--background-color);
+  background: var(--dark-color);
+  display: flex;
+  gap: 1rem;
+  top: 100%;
+  z-index: 1;
+  align-items: center;
+  border-radius: 12px;
+  overflow: hidden;
+  right: 50%;
+  transform: translateX(50%);
+}
+.menu-category h3 {
+  cursor: pointer;
+}
+
+.menu-container {
+  border-radius: 2rem;
+  position: fixed;
+  top: 50%;
+  background-color: var(--dark-color);
+  right: 50%;
+  transform: translate(50%, -50%);
+  width: 50%;
+}
+.menu-container h1 {
+  color: var(--background-color);
+}
+.menu-container a {
+  color: var(--background-color) !important;
+  font-weight: bold;
+}

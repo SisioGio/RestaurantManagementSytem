@@ -1,11 +1,15 @@
+const { Op } = require("sequelize");
+
 module.exports = (
   superClass,
   sequelize,
   Sequelize,
   meal,
   ingredient,
-  orderItemModel
+  orderItemModel,
+  category
 ) => {
+  const moment = require("moment");
   const Chef = sequelize.define(
     "chef",
     {},
@@ -39,19 +43,25 @@ module.exports = (
     return chef;
   };
   // Check add meal ( menu item)
-  Chef.prototype.addMeal = async function (mealName, mealPrice, recipe) {
+  Chef.prototype.addMeal = async function (
+    mealName,
+    mealPrice,
+    categoryId,
+    recipe
+  ) {
     const mealObj = await meal.create({
       name: mealName,
       price: mealPrice,
+      categoryId: categoryId,
     });
-
-    recipe.forEach(async (x) => {
+    console.log("Meal object ID ", mealObj.id);
+    for (const ingredientItem of recipe) {
       await ingredient.create({
-        quantityNeeded: x.quantityNeeded,
-        mealId: mealObj.id,
-        inventoryId: x.inventoryId,
+        quantityNeeded: ingredientItem.quantityNeeded,
+        menuItemId: mealObj.id,
+        inventoryId: ingredientItem.inventoryId,
       });
-    });
+    }
   };
   // Check updates meal (recipe includes objects of  quantity and inventory item)
   Chef.prototype.updateMeal = async function (
@@ -100,9 +110,12 @@ module.exports = (
   // Chef starts working on an order item and the status changes to 'PREPARING'
   Chef.prototype.prepareOrderItem = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
-
+    const orderObj = await orderItemObj.getOrder();
+    const childOrder = await orderObj.getChild();
+    childOrder.status = "IN_PROGRESS";
     orderItemObj.status = "PREPARING";
     await orderItemObj.save();
+    await childOrder.save();
   };
   // Chef marks order items as 'PREPARED'
   Chef.prototype.markOrderItemAsPrepared = async function (orderItemId) {
@@ -113,6 +126,54 @@ module.exports = (
     if (orderObj.type === "ONLINE") {
       await orderObj.checkIfCompleted();
     }
+  };
+
+  Chef.getOrderItems = async function () {
+    const {
+      orderItem,
+      menuItem,
+      ingredient,
+      inventory,
+      order,
+      onsiteOrder,
+    } = require("./../models");
+
+    var orderItems = await orderItem.findAll({
+      include: [
+        {
+          model: order,
+          include: {
+            model: onsiteOrder,
+            where: {
+              status: {
+                [Op.ne]: "PREORDER",
+              },
+            },
+          },
+        },
+        {
+          model: menuItem,
+          include: { model: ingredient, include: inventory },
+        },
+      ],
+    });
+
+    const sorted = orderItems.sort((a, b) => {
+      const datea = moment(a.updatedAt);
+      const dateb = moment(b.updatedAt);
+      return datea - dateb;
+    });
+
+    const grouped = sorted.reduce((acc, item) => {
+      const { status } = item;
+      if (!acc[status]) {
+        acc[status] = [];
+      }
+      acc[status].push(item);
+      return acc;
+    }, {});
+
+    return grouped;
   };
 
   return Chef;

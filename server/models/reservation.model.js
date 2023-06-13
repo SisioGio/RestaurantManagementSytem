@@ -1,10 +1,6 @@
-module.exports = (
-  sequelize,
-  Sequelize,
-  orderModel,
-  menuItemModel,
-  orderItemModel
-) => {
+const db = require("./../models");
+
+module.exports = (sequelize, Sequelize) => {
   const Reservation = sequelize.define(
     "reservation",
     {
@@ -24,22 +20,30 @@ module.exports = (
       },
       status: {
         type: Sequelize.ENUM,
-        values: ["NEW", "PROCESSING", "COMPLETED", "CANCELED"],
+        values: ["NEW", "CONFIRMED", "PROCESSING", "COMPLETED", "CANCELED"],
         defaultValue: "NEW",
       },
       comment: {
         type: Sequelize.STRING,
       },
     },
-    {}
+    { paranoid: false }
   );
+
+  Reservation.deleteReservation = async function (reservationId) {
+    const reservation = await Reservation.findByPk(reservationId);
+    await reservation.destroy();
+
+    // await Reservation.destroy({ where: { id: reservationId } });
+  };
   // Calculates reservation total amount for the bill generation
   Reservation.prototype.getTotalAmount = async function () {
+    const { order, orderItem, menuItem, employee } = require("./../models");
     const onsiteOrders = await this.getOnsiteOrders({
       include: [
         {
-          model: orderModel,
-          include: [{ model: orderItemModel, include: menuItemModel }],
+          model: order,
+          include: [{ model: orderItem, include: menuItem }],
         },
       ],
     });
@@ -51,6 +55,86 @@ module.exports = (
       });
     });
     return totalAmount;
+  };
+
+  Reservation.getAllReservations = async function () {
+    const {
+      slot,
+      tableMdl,
+      customer,
+      user,
+      onsiteOrder,
+      orderItem,
+      menuItem,
+      inventory,
+      ingredient,
+      order,
+      waiter,
+      employee,
+    } = require("./../models");
+    return await Reservation.findAll({
+      include: [
+        slot,
+        tableMdl,
+        {
+          model: onsiteOrder,
+          include: [
+            {
+              model: order,
+              include: {
+                model: orderItem,
+                include: {
+                  model: menuItem,
+                  include: { model: ingredient, include: inventory },
+                },
+              },
+            },
+            { model: waiter, include: { model: employee, include: user } },
+          ],
+        },
+        { model: customer, include: user },
+      ],
+    });
+  };
+
+  Reservation.getReservationById = async function (reservationId) {
+    const {
+      slot,
+      tableMdl,
+      customer,
+      user,
+      onsiteOrder,
+      orderItem,
+      menuItem,
+      inventory,
+      ingredient,
+      order,
+      waiter,
+      employee,
+    } = require("./../models");
+    return await Reservation.findByPk(reservationId, {
+      include: [
+        slot,
+        tableMdl,
+        {
+          model: onsiteOrder,
+          include: [
+            {
+              model: order,
+              include: {
+                model: orderItem,
+                include: {
+                  model: menuItem,
+                  include: { model: ingredient, include: inventory },
+                },
+              },
+            },
+            { model: waiter, include: { model: employee, include: user } },
+          ],
+        },
+        { model: customer, include: user },
+      ],
+    });
   };
 
   return Reservation;

@@ -34,7 +34,7 @@ body {
 /* Main content styles */
 #content {
   background-color: var(--primary-color);
-
+  position: relative;
   flex-grow: 1; /* Allow the content to grow and fill remaining space */
 }
 

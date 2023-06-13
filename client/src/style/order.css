@@ -1,0 +1,57 @@
+.order {
+  background: var(--background-color);
+  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 0rem 1rem 1rem 1rem;
+  overflow: hidden;
+}
+.order-header {
+  /* background-color: var(--dark-color); */
+  box-sizing: border-box;
+}
+
+.order-header div p:nth-child(1) {
+  font-weight: bold;
+  font-size: 18px;
+}
+.order {
+  border: 1px solid rgb(215 215 215);
+  padding: 1rem;
+}
+.table {
+  background: var(--dark-color);
+  color: var(--background-color);
+  border: 1px solid rgb(215 215 215);
+}
+
+.orders a {
+  color: var(--background-color) !important;
+  font-weight: bold;
+}
+.update-order-item {
+  background-color: var(--dark);
+  color: var(--background-color);
+  right: 0;
+  top: 0;
+  height: fit-content;
+  width: 100%;
+  z-index: 1;
+}
+
+.gap-1 {
+  gap: 0.5rem;
+}
+
+.status {
+  background-color: var(--dark-color);
+  margin: 1rem;
+  color: var(--background-color);
+  font-weight: bold;
+  border-radius: 100rem;
+}
+
+.active {
+  background-color: var(--background-color);
+  color: var(--dark-color);
+  border-color: var(--dark-color);
+}

@@ -3,31 +3,18 @@ module.exports = (app) => {
   const { authJwt } = require("../middleware/index.js");
   var router = require("express").Router();
 
-  // Create a new user
-  router.post("/", customer.register);
+  // Create a new reservation
+  // router.post("/", customer.makeReservation);
 
-  // Try to get new accessToken using refreshToken
-  router.post("/refreshToken", customer.refreshToken);
+  // Update an reservation
+  // router.put("/", customer.updateReservation);
 
-  // Login
-  router.post("/login", customer.login);
-  router.get(
-    "/is_authenticated",
-    [authJwt.verifyToken],
-    customer.isAuthenticated
-  );
+  // Retrieve all customer reservations
+  router.get("/reservation/:userId", customer.getReservations);
 
-  // // Update an user
-  // router.put("/", user.update);
+  router.get("/test", customer.test);
+  // Delete an user with id
+  // router.delete("/:id", reservation.delete);
 
-  // // Retrieve all user
-  // router.get("/",  user.findAll);
-
-  // // Delete an user with id
-  // router.delete("/:id", user.delete);
-
-  // // Delete all users
-  // router.delete("/",  user.deleteAll);
-
-  app.use("/api/user", router);
+  app.use("/api/customer", router);
 };

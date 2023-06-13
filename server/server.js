@@ -4,6 +4,8 @@ const generateSitemap = require("./sitemap-generator");
 const cron = require("node-cron");
 const { initializeDatabase } = require("./initialization");
 const { createAssociations } = require("./associations");
+
+// const { defineClassMethods } = require("./methods/user.methods");
 const app = express();
 var bcrypt = require("bcryptjs");
 var multipart = require("connect-multiparty");
@@ -30,15 +32,19 @@ app.use(express.urlencoded({ extended: true }));
 // Import database model
 const db = require("./../server/models");
 
+// Define class/instance methods
+
+// defineUserMethods(db);
+
 // Create all required associations between tables
 createAssociations(db);
 
 db.sequelize
-  .authenticate()
+  .authenticate({ force: true })
   .then(async () => {
     // Initialize dataset
     // initializeDatabase(db, db.sequelize);
-
+    // db.user.getAllUsers();
     console.log("Sync completed");
   })
   .catch((err) => {
@@ -48,8 +54,12 @@ db.sequelize
 app.get("/", (req, res) => {
   res.json({ message: "Welcome" });
 });
-
+require("./routes/order.routes")(app);
+require("./routes/user.routes")(app);
 require("./routes/customer.routes")(app);
+require("./routes/menu.routes")(app);
+require("./routes/slot.routes")(app);
+require("./routes/reservation.routes")(app);
 // require("./routes/address.routes")(app);
 // require("./routes/businessLine.routes")(app);
 // require("./routes/company.routes")(app);

@@ -13,6 +13,15 @@ import Signin from "./components/signin";
 import Signup from "./components/signup";
 import Feedback from "./components/feedback";
 import ProtectedRoute from "./components/protectedRoute";
+import CustomerPortal from "./components/customer/customerPortal";
+import CustomerMakeReservation from "./components/customer/makeReservation";
+import TableSelection from "./components/customer/tableSelection";
+import MenuSelection from "./components/menu/menuSelection.js.js";
+import ReservationConfirmation from "./components/customer/reservationConfirmation";
+import WaiterPortal from "./components/waiter/waiterPortal";
+import Order from "./components/waiter/order";
+import ChefPortal from "./components/chef/chefPortal";
+import AllReservations from "./components/waiter/allReservations";
 
 const showFeedbackContext = createContext();
 const dispatchFeedbackContext = createContext();
@@ -33,13 +42,11 @@ const UserReducer = (state, action) => {
   return {
     data: action.data,
     authenticated: action.authenticated,
-    type: action.type,
   };
 };
 const Userstates = {
   data: {},
   authenticated: false,
-  type: "",
 };
 function App() {
   const [feedback, setFeedback] = useReducer(FeedbackReducer, Feedbackstates);
@@ -57,16 +64,48 @@ function App() {
                 <div id="content">
                   <Routes>
                     <Route
-                      path="/home"
-                      element={
-                        <ProtectedRoute requestedRoute={"home"}>
-                          {" "}
-                          <Home />
-                        </ProtectedRoute>
-                      }
+                      exact
+                      path="/customerPortal"
+                      element={<CustomerPortal />}
                     />
-                    <Route path="/signin" element={<Signin />} />
-                    <Route path="/signup" element={<Signup />} />
+                    <Route
+                      exact
+                      path="/make-reservation/table-selection"
+                      element={<TableSelection />}
+                    />
+                    <Route
+                      exact
+                      path="/make-reservation/table-selection/menu-items"
+                      element={<MenuSelection />}
+                    />
+
+                    <Route
+                      exact
+                      path="/make-reservation/table-selection/menu-items/confirmation"
+                      element={<ReservationConfirmation />}
+                    />
+                    <Route exact path="/home" element={<Home />} />
+                    <Route exact path="/signin" element={<Signin />} />
+                    <Route exact path="/signup" element={<Signup />} />
+                    <Route
+                      exact
+                      path="/waiterPortal"
+                      element={<WaiterPortal />}
+                    />
+                    <Route
+                      exact
+                      path="/reservations"
+                      element={<AllReservations />}
+                    />
+                    <Route exact path="/order" element={<Order />} />
+
+                    <Route
+                      exact
+                      path="/make-reservation"
+                      element={<CustomerMakeReservation />}
+                    />
+
+                    <Route exact path="/order-items" element={<ChefPortal />} />
                   </Routes>
                 </div>
 

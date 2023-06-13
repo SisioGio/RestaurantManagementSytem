@@ -1,0 +1,53 @@
+@import "./theme.css";
+.ligh-title-xxl {
+  font-family: "Quicksand", sans-serif;
+  font-weight: lighter;
+  font-size: 56px;
+  text-align: center;
+  color: var(--dark-color);
+}
+.rounded-2 {
+  border-radius: 2rem;
+  overflow: hidden;
+}
+.gap-2 {
+  gap: 2rem;
+}
+thead {
+  background: var(--dark-color);
+}
+
+tbody {
+  background: var(--secondary-color);
+}
+tbody {
+  color: var(--gray-dark);
+}
+.edit-btn {
+  cursor: pointer;
+}
+.add-btn {
+  height: fit-content;
+  align-self: center;
+}
+
+.available {
+  background-color: rgb(157 255 157);
+}
+.unavailable {
+  background-color: rgb(255 101 122);
+}
+
+.selected {
+  border: 1px solid green;
+  box-sizing: border-box;
+}
+
+.table {
+  cursor: pointer;
+}
+
+.user-name {
+  vertical-align: middle;
+  padding: 0rem 0.5rem;
+}

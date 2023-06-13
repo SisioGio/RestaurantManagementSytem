@@ -33,7 +33,7 @@ form {
   margin-bottom: 10px;
 }
 
-input {
+.signup input {
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
@@ -52,7 +52,7 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+.signup button:hover {
   background-color: #45a049;
 }
 

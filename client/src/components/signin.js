@@ -1,15 +1,17 @@
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
 import "./../style/signup.css";
 import apiService from "../api/apiService";
 import FormField from "./formField";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { DispatchFeedbackContexts } from "../App";
+import { DispatchUserContexts, ShowUserContexts } from "../App";
 
 function Signin() {
+  const userContext = ShowUserContexts();
   const dispatch = DispatchFeedbackContexts();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-
+  const UserDispatcher = DispatchUserContexts();
   const requestedUrl = params.get("requestedRoute");
   const [isSuccess, setIsSuccess] = useState(false);
   const [formErrors, setFormErrors] = useState({
@@ -48,34 +50,43 @@ function Signin() {
       console.log(data);
       try {
         const res = await apiService.signin(data);
+        console.log(res);
+        UserDispatcher({
+          authenticated: true,
+          data: res.data,
+        });
 
         dispatch({
           value: true,
           message: `Welcome!`,
           type: "Success",
         });
+
         setIsSuccess(true);
       } catch (err) {
         console.log(err);
         dispatch({
           value: true,
-          message: err.response.data.message
-            ? err.response.data.message
-            : "Error",
+          message: "Error from server",
           type: "Error",
         });
       }
     }
   };
 
+  useEffect(() => {}, [userContext]);
   return (
     <div className="signup">
       {isSuccess ? (
         requestedUrl ? (
           <Navigate to={"/" + requestedUrl} />
-        ) : (
-          <Navigate to="/" />
-        )
+        ) : userContext.data.role === "CUSTOMER" ? (
+          <Navigate to="/customerPortal" />
+        ) : userContext.data.role === "WAITER" ? (
+          <Navigate to="/waiterPortal" />
+        ) : userContext.data.role === "CHEF" ? (
+          <Navigate to="/order-items" />
+        ) : null
       ) : null}
 
       <div className="form">

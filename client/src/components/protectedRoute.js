@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, Route, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import apiService from "./../api/apiService";
 import { DispatchUserContexts } from "../App";
 function ProtectedRoute({ children, requestedRoute }) {

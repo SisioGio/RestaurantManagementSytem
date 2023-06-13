@@ -1,4 +1,4 @@
-module.exports = (superClass, sequelize, Sequelize) => {
+module.exports = (sequelize, Sequelize) => {
   const OnlineOrder = sequelize.define(
     "onlineOrder",
     {
@@ -32,7 +32,8 @@ module.exports = (superClass, sequelize, Sequelize) => {
     plannedDateTime,
     orderItems
   ) {
-    const superObj = await superClass.create({});
+    const { order } = require("./../models");
+    const superObj = await order.create({});
     const onlineOrder = await OnlineOrder.create({
       customerId: customerId,
       plannedDateTime: plannedDateTime,

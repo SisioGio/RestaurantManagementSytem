@@ -1,3 +1,5 @@
+const { Op } = require("sequelize");
+const moment = require("moment");
 module.exports = (sequelize, Sequelize) => {
   const Table = sequelize.define(
     "table",

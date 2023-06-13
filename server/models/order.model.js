@@ -1,4 +1,4 @@
-module.exports = (sequelize, Sequelize, orderItemModel) => {
+module.exports = (sequelize, Sequelize) => {
   const Order = sequelize.define(
     "order",
     {
@@ -14,15 +14,23 @@ module.exports = (sequelize, Sequelize, orderItemModel) => {
   // Add items to order
   Order.prototype.addItemsToOrder = async function (listOfItems) {
     // Method to add items to the order
+    const { orderItem } = require("./../models");
+
     for (const item of listOfItems) {
-      await orderItemModel.create({
+      await orderItem.create({
         orderId: this.id,
         menuItemId: item.menuItemId,
         quantity: item.quantity,
       });
     }
   };
-
+  Order.prototype.getChild = async function () {
+    if (this.type === "ONLINE") {
+      return this.getOnlineOrder();
+    } else {
+      return this.getOnsiteOrder();
+    }
+  };
   // Checks whatever each of the assigned orderItems has status 'SERVED' or 'CANCELED'
   // If the above condition is true, then the status of the order changes to 'COMPLETED'
 

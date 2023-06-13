@@ -3,7 +3,7 @@ module.exports = (sequelize, Sequelize) => {
     "inventory",
     {
       quantity: {
-        type: Sequelize.FLOAT(5, 2),
+        type: Sequelize.FLOAT(10, 2),
         allowNull: false,
       },
       unitOfMeasure: {
@@ -11,7 +11,7 @@ module.exports = (sequelize, Sequelize) => {
         values: ["ml", "kg", "g", "L", "CL", "pcs"],
       },
       notifyAt: {
-        type: Sequelize.FLOAT(5, 2),
+        type: Sequelize.FLOAT(10, 2),
         defaultValue: 0.0,
       },
       name: {

@@ -1,12 +1,15 @@
 module.exports = (
   user,
   sequelize,
-  Sequelize,
   reservationModel,
   onlineOrderModel,
   onlinePaymentModel,
-  reviewModel
+  reviewModel,
+
+  slot,
+  onsiteOrderModel
 ) => {
+  const Sequelize = require("sequelize");
   var bcrypt = require("bcryptjs");
   const jwt = require("jsonwebtoken");
   const config = require("../config/auth.config");
@@ -52,11 +55,36 @@ module.exports = (
     // await customer.setUser(user);
     return customer;
   };
+
+  Customer.prototype.getOwnReservations = async function () {
+    const reservations = await this.getReservations({ include: slot });
+    return reservations;
+  };
   // Customer creates reservation
   Customer.prototype.makeReservation = async function (attributes) {
-    attributes.customerId = this.id;
+    const customerId = this.id;
+    const tableId = attributes.tableId;
+    const slotId = attributes.slotId;
+    const date = attributes.date;
+    const noOfPeople = attributes.noOfPeople;
+    const comment = attributes.comment;
+    const reservationObj = await reservationModel.create({
+      date: date,
+      numberOfPeople: noOfPeople,
+      comment: comment,
+      customerId: customerId,
+      tableId: tableId,
+      slotId: slotId,
+    });
+    if (attributes.menuItems) {
+      await onsiteOrderModel.createWithAbstractClass({
+        reservationId: reservationObj.id,
+        orderItems: attributes.menuItems,
+        status: "PREORDER",
+      });
+    }
 
-    const reservationObj = await reservationModel.create(attributes);
+    return reservationObj;
   };
   // Customer deletes reservation
   Customer.prototype.cancelReservation = async function (reservatoionId) {

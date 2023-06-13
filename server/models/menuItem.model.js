@@ -19,5 +19,47 @@ module.exports = (sequelize, Sequelize) => {
     {}
   );
 
+  MenuItem.getMenuItems = async function () {
+    const { ingredient, inventory, category } = require("./../models");
+    var menuItems = await MenuItem.findAll({
+      include: [{ model: ingredient, include: inventory }, category],
+    });
+
+    // Group the menu items by category
+    const groupedMenuItems = menuItems.reduce((acc, menuItem) => {
+      const { category } = menuItem;
+      if (!acc[category.name]) {
+        acc[category.name] = [];
+      }
+      acc[category.name].push(menuItem);
+      return acc;
+    }, {});
+
+    // Sort the categories based on the 'sortOrder' property
+    var sortedCategories = Object.keys(groupedMenuItems).sort((a, b) => {
+      return (
+        groupedMenuItems[a][0].category.sortOrder -
+        groupedMenuItems[b][0].category.sortOrder
+      );
+    });
+    var newItems = {};
+    // Sort the menu items within each category
+    sortedCategories.forEach((categoryName) => {
+      newItems[categoryName] = groupedMenuItems[categoryName].sort((a, b) => {
+        const nameA = a.name.toUpperCase();
+        const nameB = b.name.toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    });
+
+    return newItems;
+  };
+
   return MenuItem;
 };

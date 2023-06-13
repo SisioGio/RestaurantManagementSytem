@@ -1,0 +1,53 @@
+.reservation-submission {
+  position: fixed;
+  top: 50%;
+  right: 50%;
+  transform: translate(+50%, -50%);
+  background: var(--light);
+  border-radius: 12px;
+  border: 1px solid var(--gray);
+  box-sizing: border-box;
+  -webkit-box-shadow: 0px 0px 38px 10px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 0px 38px 10px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px 0px 38px 10px rgb(161 156 156 / 55%);
+}
+
+.reservation-header {
+  border: 1px solid rgb(215 215 215);
+  border-radius: 12px;
+}
+
+.reservation-header div p:nth-child(1) {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.bill {
+  text-align: center;
+  position: fixed;
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+  background-color: var(--dark-color);
+  color: var(--background-color);
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.bill select {
+  background: transparent;
+  color: white;
+  line-height: 3rem;
+  height: 3rem;
+  font-size: 1rem;
+}
+
+.bill select option {
+  color: var(--dark-color);
+  background-color: var(--background-color);
+  line-height: 3rem;
+  height: 3rem;
+  font-size: 1rem;
+}

@@ -1,4 +1,11 @@
-module.exports = (superClass, sequelize, Sequelize, inventory, table) => {
+module.exports = (
+  superClass,
+  sequelize,
+  Sequelize,
+  inventory,
+  table,
+  category
+) => {
   const Owner = sequelize.define(
     "owner",
     {},
@@ -29,6 +36,16 @@ module.exports = (superClass, sequelize, Sequelize, inventory, table) => {
     await owner.setEmployee(employeeObj);
 
     return owner;
+  };
+
+  Owner.prototype.addCategory = async function (
+    categoryName,
+    categorySortOrder
+  ) {
+    return await category.create({
+      name: categoryName,
+      sortOrder: categorySortOrder,
+    });
   };
 
   Owner.prototype.addInventory = async function (
