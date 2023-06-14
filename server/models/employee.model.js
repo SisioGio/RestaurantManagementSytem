@@ -57,5 +57,22 @@ module.exports = (superClass, sequelize, Sequelize, timeTracker) => {
     });
     timeEntry.setEmployee(this);
   };
+
+  Employee.getChild = async function (empId) {
+    const employeeObj = await Employee.findByPk(empId);
+
+    if (employeeObj.role === "WAITER") {
+      return await employeeObj.getWaiter();
+    }
+    if (employeeObj.role === "DRIVER") {
+      return await employeeObj.getDriver();
+    }
+    if (employeeObj.role === "CHEF") {
+      return await employeeObj.getChef();
+    }
+    if (employeeObj.role === "OWNER") {
+      return await employeeObj.getOwner();
+    }
+  };
   return Employee;
 };

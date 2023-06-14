@@ -61,5 +61,18 @@ module.exports = (sequelize, Sequelize) => {
     return newItems;
   };
 
+  MenuItem.prototype.checkIfAvailable = async function (quantity) {
+    const { inventory } = require("./../models");
+    const ingredients = await this.getIngredients({ include: inventory });
+
+    for (const ingredient of ingredients) {
+      var quantityNeeded = ingredient.quantityNeeded * quantity;
+      if (quantityNeeded > ingredient.inventory.quantity) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   return MenuItem;
 };

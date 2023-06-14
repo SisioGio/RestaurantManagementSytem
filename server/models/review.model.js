@@ -3,9 +3,12 @@ module.exports = (sequelize, Sequelize) => {
     "review",
     {
       star: {
-        type: Sequelize.ENUM,
-        values: ["1", "2", "3", "4", "5"],
-        defaultValue: "1",
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          min: 1,
+          max: 5,
+        },
       },
       comment: {
         type: Sequelize.STRING,

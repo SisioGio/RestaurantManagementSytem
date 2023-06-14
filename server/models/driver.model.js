@@ -33,7 +33,8 @@ module.exports = (superClass, sequelize, Sequelize, onlineOrderModel) => {
   };
   // Driver picks order and status changes to 'OUT FOR DELIVERY'
   Driver.prototype.pickUpOrder = async function (onlineOrderId) {
-    if (!this.canPickUpDelivery()) {
+    var canPickMoreDeliveries = await this.canPickUpDelivery();
+    if (!canPickMoreDeliveries) {
       throw new Error(
         "Driver reached the maximum number of 'OUT FOR DELIVERY' deliveries."
       );
@@ -70,7 +71,7 @@ module.exports = (superClass, sequelize, Sequelize, onlineOrderModel) => {
       where: { status: "OUT FOR DELIVERY" },
     });
 
-    return pendingDeliveries.length >= 3;
+    return pendingDeliveries.length <= 3;
   };
 
   return Driver;

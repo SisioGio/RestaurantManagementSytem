@@ -90,7 +90,19 @@ module.exports = (
     }
 
     if (orderItemObj.status === "NEW") {
+      const orderObj = await orderItemObj.getOrder();
+      const menuItem = await orderItemObj.getMenuItem();
+      const diffAmount =
+        parseFloat(quantity - orderItemObj.quantity) * menuItem.price;
+
+      const newTotalAmount =
+        parseFloat(orderObj.totalAmount) + parseFloat(diffAmount);
+
+      orderObj.totalAmount = newTotalAmount;
+
       orderItemObj.quantity = quantity;
+      await orderObj.save();
+
       await orderItemObj.save();
     } else {
       throw new Error("Order item cannot be updated!");
@@ -118,21 +130,13 @@ module.exports = (
     }
     const orderObj = await orderItemObj.getOrder();
     if (orderObj.type === "ONSITE") {
-      if (orderItemObj.status === "READY") {
-        orderItemObj.status = "COMPLETED";
-        await orderItemObj.save();
-        const superOrderObj = await orderItemObj.getOrder();
+      orderItemObj.status = "COMPLETED";
+      await orderItemObj.save();
+      const superOrderObj = await orderItemObj.getOrder();
 
-        await superOrderObj.checkIfCompleted();
-      } else {
-        console.log(
-          "Cannot update order item with status '",
-          orderItemObj.status,
-          "'"
-        );
-      }
+      await superOrderObj.checkIfCompleted();
     } else {
-      console.log("Online orders cannot be served!");
+      throw Error("Cannot serve online order item");
     }
   };
 
@@ -148,6 +152,8 @@ module.exports = (
       paymentType: paymentType,
     });
 
+    const customer = await reservationObj.getCustomer();
+    await customer.increasePoints(2);
     reservationObj.status = "COMPLETED";
     await reservationObj.save();
   };

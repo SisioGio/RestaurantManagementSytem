@@ -9,7 +9,7 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     timestamps: true,
     paranoid: true,
   },
-  logging: false,
+  logging: true,
 
   pool: {
     max: dbConfig.pool.max,
@@ -26,6 +26,7 @@ db.sequelize = sequelize;
 db.timeTracker = require("./timeTracker.model.js")(sequelize, Sequelize);
 db.ingredient = require("./ingredient.model.js")(sequelize, Sequelize);
 db.review = require("./review.model.js")(sequelize, Sequelize);
+db.address = require("./address.model.js")(sequelize, Sequelize);
 
 db.bill = require("./bill.model.js")(sequelize, Sequelize);
 

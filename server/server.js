@@ -2,9 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const generateSitemap = require("./sitemap-generator");
 const cron = require("node-cron");
-const { initializeDatabase } = require("./initialization");
-const { createAssociations } = require("./associations");
-
+const { initializeDatabase } = require("./utils/initialization");
+const { createAssociations } = require("./utils/associations");
+const scheduler = require("./utils/scheduler");
 // const { defineClassMethods } = require("./methods/user.methods");
 const app = express();
 var bcrypt = require("bcryptjs");
@@ -32,15 +32,12 @@ app.use(express.urlencoded({ extended: true }));
 // Import database model
 const db = require("./../server/models");
 
-// Define class/instance methods
-
-// defineUserMethods(db);
-
 // Create all required associations between tables
 createAssociations(db);
 
+scheduler.scheduleJobs(db);
 db.sequelize
-  .sync({ force: true })
+  .authenticate({ force: true })
   .then(async () => {
     // Initialize dataset
     // initializeDatabase(db, db.sequelize);
@@ -60,24 +57,6 @@ require("./routes/customer.routes")(app);
 require("./routes/menu.routes")(app);
 require("./routes/slot.routes")(app);
 require("./routes/reservation.routes")(app);
-// require("./routes/address.routes")(app);
-// require("./routes/businessLine.routes")(app);
-// require("./routes/company.routes")(app);
-// require("./routes/costCenter.routes")(app);
-// require("./routes/factory.routes")(app);
-// require("./routes/image.routes")(app);
-// require("./routes/order.routes")(app);
-// require("./routes/payment.routes")(app);
-// require("./routes/product.routes")(app);
-// require("./routes/taxCode.routes")(app);
-// require("./routes/transaction.routes")(app);
-// require("./routes/user.routes")(app);
-// require("./routes/invoice.routes")(app);
-// require("./routes/vendor.routes")(app);
-// require("./routes/customer.routes")(app);
-// require("./routes/customerGroup.routes")(app);
-// require("./routes/taxValues.routes")(app);
-// require("./routes/invoiceLine.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

@@ -106,7 +106,7 @@ module.exports = (
   Chef.prototype.prepareOrderItem = async function (orderItemId) {
     const orderItemObj = await orderItemModel.findByPk(orderItemId);
     if (!orderItemObj) {
-      throw Error(`Order item with ID ${orderItemModel} not found`);
+      throw Error(`Order item with ID ${orderItemModel.id} not found`);
     }
     const orderObj = await orderItemObj.getOrder();
     const childOrder = await orderObj.getChild();
@@ -115,6 +115,16 @@ module.exports = (
       throw Error(`Cannot update order item with status ${childOrder.status}`);
     }
 
+    const menuItem = await orderItemObj.getMenuItem();
+    const ingredients = await menuItem.getIngredients();
+    for (const ingredient of ingredients) {
+      var inventoryItem = await ingredient.getInventory();
+
+      await inventoryItem.increment("quantity", {
+        by: -ingredient.quantityNeeded,
+      });
+      await inventoryItem.save();
+    }
     childOrder.status = "IN_PROGRESS";
     orderItemObj.status = "PREPARING";
     await orderItemObj.save();

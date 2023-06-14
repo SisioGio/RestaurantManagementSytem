@@ -189,13 +189,30 @@ module.exports = {
     db.reservation.hasOne(db.bill);
     db.bill.belongsTo(db.reservation);
 
-    // Customer - Review (1:N)
-    db.customer.hasMany(db.review);
-    db.review.belongsTo(db.customer);
+    // Customer - Review (1:1)
+    db.customer.hasOne(db.review, {
+      foreignKey: {
+        name: "customerId",
+        allowNull: false,
+        unique: true,
+      },
+    });
+    db.review.belongsTo(db.customer, {
+      foreignKey: "customerId",
+    });
 
     // user - refreshToken
     db.user.hasMany(db.refreshToken, { onDelete: "RESTRICT" });
     db.refreshToken.belongsTo(db.user, { onDelete: "RESTRICT" });
+
+    // user - address
+    db.customer.hasOne(db.address, {
+      foreignKey: {
+        name: "customerId",
+        unique: true,
+      },
+    });
+    db.address.belongsTo(db.customer, { onDelete: "RESTRICT" });
 
     // Menu item - category
     db.category.hasMany(db.menuItem);

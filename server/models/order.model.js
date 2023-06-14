@@ -8,6 +8,9 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.ENUM,
         values: ["ONLINE", "ONSITE"],
       },
+      totalAmount: {
+        type: Sequelize.FLOAT(10, 2),
+      },
     },
     { paranoid: false }
   );
@@ -15,7 +18,7 @@ module.exports = (sequelize, Sequelize) => {
   Order.prototype.addItemsToOrder = async function (listOfItems, transaction) {
     // Method to add items to the order
     const { orderItem, menuItem } = require("./../models");
-
+    var totalAmount = 0;
     for (const item of listOfItems) {
       var checkMenuItem = await menuItem.findOne({
         where: { id: item.menuItemId },
@@ -27,6 +30,11 @@ module.exports = (sequelize, Sequelize) => {
       if (item.quantity <= 0 || item.quantity > 30) {
         throw Error("Menu item quantity must be between 1 and 30 (incl)");
       }
+
+      if (!checkMenuItem.checkIfAvailable(item.quantity)) {
+        throw Error("This item is not available! Not enough inventory");
+      }
+      totalAmount += parseFloat(checkMenuItem.price * item.quantity);
       await orderItem.create(
         {
           orderId: this.id,
@@ -36,7 +44,11 @@ module.exports = (sequelize, Sequelize) => {
         { transaction }
       );
     }
+
+    this.totalAmount = totalAmount;
+    await this.save({ transaction });
   };
+
   Order.prototype.getChild = async function () {
     if (this.type === "ONLINE") {
       return this.getOnlineOrder();
@@ -66,7 +78,7 @@ module.exports = (sequelize, Sequelize) => {
       }
     } else if (this.type === "ONLINE") {
       childOrder = await this.getOnlineOrder();
-      console.log(childOrder);
+
       var isReadyToBeDelivered = orderItems.every((orderItem) => {
         return orderItem.status === "READY" || orderItem.status === "CANCELED";
       });
@@ -75,10 +87,6 @@ module.exports = (sequelize, Sequelize) => {
         childOrder.status = "READY";
         await childOrder.save();
       }
-      console.log(
-        "Order  isReadyToBeDelivered? ",
-        isReadyToBeDelivered.toString()
-      );
     }
   };
 

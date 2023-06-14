@@ -1,6 +1,6 @@
 const moment = require("moment-timezone");
 const { getLineAndCharacterOfPosition } = require("typescript");
-const { meal } = require("./models");
+const { meal } = require("./../models");
 module.exports = {
   async initializeDatabase(db, sequelize) {
     const customer = await db.customer.createWithAbstractClass(

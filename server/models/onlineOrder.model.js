@@ -15,7 +15,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.ENUM,
         values: [
           "NEW",
-          "PAID",
           "IN_PROGRESS",
           "READY",
           "OUT FOR DELIVERY",

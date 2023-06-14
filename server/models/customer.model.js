@@ -30,9 +30,9 @@ module.exports = (
     }
   );
 
-  Customer.prototype.increasePoints = function () {
-    this.points += 1;
-    console.log("Customer points increased by one! New points " + this.points);
+  Customer.prototype.increasePoints = async function (increaseBy) {
+    this.increment("points", { by: increaseBy });
+    await this.save();
   };
   // Create customer object using User model as super class
   Customer.createWithAbstractClass = async function (
@@ -63,6 +63,32 @@ module.exports = (
     const reservations = await this.getReservations({ include: slot });
     return reservations;
   };
+
+  Customer.prototype.updatePersonalInfo = async function (attributes) {
+    const userObj = await this.getUser();
+    await userObj.update({
+      firstName: attributes.firstName,
+      lastName: attributes.lastName,
+      phoneNo: attributes.phoneNo,
+    });
+  };
+
+  Customer.prototype.addAddress = async function (attributes) {
+    const { address } = require("./../models");
+    const addressObj = await address.create(attributes);
+
+    const userObj = await this.setAddress(addressObj);
+  };
+
+  Customer.prototype.updateAddress = async function (attributes) {
+    const { address } = require("./../models");
+
+    const addressObj = await this.getAddress();
+    addressObj.update(attributes);
+
+    await addressObj.save();
+  };
+
   // Customer creates reservation
   Customer.prototype.makeReservation = async function (attributes) {
     const customerId = this.id;
@@ -117,6 +143,7 @@ module.exports = (
     transactionAmount,
     transactionHash
   ) {
+    const { menuItem } = require("./../models");
     let transaction;
     try {
       transaction = await sequelize.transaction();
@@ -127,6 +154,24 @@ module.exports = (
       if (!orderItems || orderItems.length === 0) {
         throw Error("Online order must have at least one menu item");
       }
+      var totalAmount = 0;
+      for (const item of orderItems) {
+        const quantity = item.quantity;
+        const menuItemObj = await menuItem.findByPk(item.menuItemId);
+        if (!menuItemObj) {
+          throw Error("No menu item was found");
+        }
+        const price = menuItemObj.price;
+        const itemTotal = quantity * price;
+        totalAmount += parseFloat(itemTotal);
+      }
+
+      if (parseFloat(totalAmount) !== parseFloat(transactionAmount)) {
+        throw Error(
+          `Transaction amount does not match order amount (${totalAmount})`
+        );
+      }
+
       const onlineOrderObj = await onlineOrderModel.createWithAbstractClass(
         this.id,
         plannedDateTime,
@@ -134,11 +179,12 @@ module.exports = (
       );
 
       await this.payOnlineOrder(
-        onlineOrderObj.id,
+        onlineOrderObj,
 
         transactionAmount,
         transactionHash
       );
+      await this.increasePoints(1);
 
       await transaction.commit();
       return onlineOrderObj;
@@ -149,37 +195,21 @@ module.exports = (
       throw Error(err.message);
     }
   };
+
   // Customer pays online order
   Customer.prototype.payOnlineOrder = async function (
-    onlineOrderId,
+    onlineOrderObj,
     transactionAmount,
     transactionHash
   ) {
-    const { menuItem } = require("./../models");
-    const onlineOrderObj = await onlineOrderModel.findByPk(onlineOrderId);
-    const orderObj = await onlineOrderObj.getOrder();
-    const orderItems = await orderObj.getOrderItems({ include: menuItem });
-    var totalAmount = 0;
-
-    for (const item of orderItems) {
-      const quantity = item.quantity;
-      const price = item.menuItem.price;
-      const itemTotal = quantity * price;
-      totalAmount += parseFloat(itemTotal);
-    }
-
-    if (parseFloat(totalAmount) !== parseFloat(transactionAmount)) {
-      throw Error(
-        `Transaction amount does not match order amount (${totalAmount})`
-      );
-    }
     const onlinePaymentObj = await onlinePaymentModel.create({
       totalAmount: transactionAmount,
       transactionHash: transactionHash,
       onlineOrderId: onlineOrderObj.id,
       customerId: this.id,
     });
-    onlineOrderObj.status = "PAID";
+
+    await onlineOrderObj.save();
   };
   // Customer leaves review
   Customer.prototype.leaveReview = async function (stars, comment) {
