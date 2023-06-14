@@ -434,6 +434,8 @@ describe("Server", async function () {
   });
 
   it("customer creates reservation with order", async function () {
+    this.timeout(100000);
+
     const secondReservationObj = await customer.makeReservation({
       noOfPeople: 4,
       date: moment("18.04.2023", "DD.MM.yyyy").format("YYYY-MM-DD"),
@@ -457,7 +459,12 @@ describe("Server", async function () {
     });
     assert.strictEqual(result, 1);
   });
+  it("created order has correct total amount", async function () {
+    const orderObj = await db.order.findByPk(1);
 
+    result = orderObj.totalAmount;
+    assert.strictEqual(result, 43);
+  });
   it("check  status of preordered items", async function () {
     const preOrderedOrder = await db.onsiteOrder.findOne({ where: { id: 1 } });
 
@@ -532,6 +539,12 @@ describe("Server", async function () {
     result = await db.orderItem.findByPk(4);
     assert.strictEqual(result.quantity, 100);
   });
+
+  it("order amount is updated after order item quantityi has changed", async function () {
+    const orderObj = await db.order.findByPk(2);
+    result = orderObj.totalAmount;
+    assert.strictEqual(result, 2122);
+  });
   it("chef retrieves the order items ( test grouping by status)", async function () {
     var items = await db.chef.getOrderItems();
     result = Object.keys(items).length;
@@ -549,6 +562,14 @@ describe("Server", async function () {
     result = orderItemObj.status;
     assert.strictEqual(result, "PREPARING");
   });
+
+  it("check if inventory item quantity has decreased", async function () {
+    var inventoryItem = await db.inventory.findByPk(3);
+
+    result = inventoryItem.quantity;
+    assert.strictEqual(result, 49.9);
+  });
+
   it("check if order status changes to 'IN_PROGRESS' when one order item changes to 'PREPARING'", async function () {
     var orderObj = await db.order.findByPk(2);
     var onsiteOrderObj = await orderObj.getChild();
@@ -639,6 +660,12 @@ describe("Server", async function () {
     assert.strictEqual(result, 2122.0);
   });
 
+  it("customer points should be increased by two", async function () {
+    var customer = await db.customer.findByPk(1);
+    result = parseFloat(customer.points);
+    assert.strictEqual(result, 2);
+  });
+
   it("customer creates online order for past date", async function () {
     try {
       await customer.createOnlineOrder(
@@ -693,7 +720,9 @@ describe("Server", async function () {
             menuItemId: 1,
             quantity: 3333,
           },
-        ]
+        ],
+        36663,
+        "fdfasdfsadfsadfsad"
       );
       assert.fail("Expected an error to be thrown");
     } catch (err) {
@@ -740,12 +769,282 @@ describe("Server", async function () {
     result = await db.onlinePayment.count();
     assert.strictEqual(result, 1);
   });
-  // it("error when trying to delete an order item with status <> 'NEW'", async function () {
-  //   try {
-  //     await waiter.removeItemFromOrder(2, 100);
-  //     assert.fail("Expected an error to be thrown");
-  //   } catch (err) {
-  //     assert.strictEqual(err.message, "Order item with ID =2 not found");
-  //   }
-  // });
+
+  it("orders should be 2", async function () {
+    result = await db.order.count();
+    assert.strictEqual(result, 2);
+  });
+  it("customer should now have 3 points", async function () {
+    result = await db.customer.findByPk(1);
+    assert.strictEqual(result.points, 3);
+  });
+  it("customer leaves second review (error)", async function () {
+    await customer.leaveReview(4, "Amazing service and very kind staff");
+
+    result = await db.review.count();
+    assert.strictEqual(result, 1);
+  });
+  it("customer leaves review", async function () {
+    try {
+      await customer.leaveReview("5", "Amazing service and very kind staff");
+      assert.fail("Expected an error to be thrown");
+    } catch (err) {
+      assert.strictEqual(err.message, "Validation error");
+    }
+  });
+
+  it("customer updates personal info", async function () {
+    await customer.updatePersonalInfo({
+      firstName: "TestingName",
+      lastName: "TestingLastName",
+      phoneNo: "333333333333",
+    });
+    const userObj = await db.user.findByPk(1);
+
+    result = userObj.firstName;
+    assert.strictEqual(result, "TestingName");
+  });
+
+  it("customer adds address ", async function () {
+    await customer.addAddress({
+      country: "Italy",
+      postCode: "01323",
+      city: "Viterbo",
+      street: "Via Marinelli",
+      streetNo: "24/a",
+    });
+    const address = await db.address.findByPk(1);
+
+    result = address.customerId;
+    assert.strictEqual(result, 1);
+  });
+  it("customer updates address ", async function () {
+    await customer.updateAddress({
+      country: "Poland",
+      postCode: "04323",
+      city: "Warsaw",
+      street: "Ul.Zawiszy",
+      streetNo: "21",
+    });
+    const address = await db.address.findByPk(1);
+
+    result = address.country;
+    assert.strictEqual(result, "Poland");
+  });
+
+  it("chef retrieves the order items (stauts = 'NEW'", async function () {
+    var items = await db.chef.getOrderItems();
+    result = items["NEW"].length;
+    assert.strictEqual(result, 1);
+  });
+
+  it("chef marks order item as 'PREPARING'", async function () {
+    var items = await chef.prepareOrderItem(5);
+
+    var orderItemObj = await db.orderItem.findByPk(5);
+
+    result = orderItemObj.status;
+    assert.strictEqual(result, "PREPARING");
+  });
+
+  it("check if order status changes to 'IN_PROGRESS' when one order item changes to 'PREPARING'", async function () {
+    var orderObj = await db.order.findByPk(4);
+    var onlineOrderObj = await orderObj.getChild();
+
+    result = onlineOrderObj.status;
+    assert.strictEqual(result, "IN_PROGRESS");
+  });
+
+  it("chef marks as 'READY' one  item", async function () {
+    await chef.markOrderItemAsPrepared(5);
+
+    result = await db.orderItem.count({ where: { status: "READY" } });
+    assert.strictEqual(result, 1);
+  });
+
+  it("waiter tries to serve an order item of an onlineOrder -> Error", async function () {
+    try {
+      await waiter.serveOrderItem(5);
+      assert.fail("Expected an error to be thrown");
+    } catch (err) {
+      assert.strictEqual(err.message, "Cannot serve online order item");
+    }
+  });
+
+  it("order status should  be 'READY'", async function () {
+    var orderObj = await db.onlineOrder.findByPk(2);
+
+    result = orderObj.status;
+    assert.strictEqual(result, "READY");
+  });
+
+  it("driver picks online order and status changes to 'OUT FOR DELIVERY'", async function () {
+    await driver.pickUpOrder(2);
+    var onlineOrder = await db.onlineOrder.findByPk(2);
+
+    result = onlineOrder.status;
+    assert.strictEqual(result, "OUT FOR DELIVERY");
+  });
+
+  it("online order pickedAt  shoulld not be empty", async function () {
+    var onlineOrder = await db.onlineOrder.findByPk(2);
+
+    result = onlineOrder.pickedAt === null;
+    assert.strictEqual(result, false);
+  });
+
+  it("driver can pick more onlineOrders ( max is 3)", async function () {
+    var check = await driver.canPickUpDelivery();
+
+    result = check;
+    assert.strictEqual(result, true);
+  });
+  it("driver completes delivery and status changes to 'DELIVERED'", async function () {
+    await driver.completeDelivery(2);
+    var onlineOrderObj = await db.onlineOrder.findByPk(2);
+    result = onlineOrderObj.status;
+    assert.strictEqual(result, "DELIVERED");
+  });
+
+  it("after completing delivery, order items changes to 'COMPLETED'", async function () {
+    var orderItem = await db.orderItem.findByPk(5);
+    result = orderItem.status;
+    assert.strictEqual(result, "COMPLETED");
+  });
+  it("owner gets reviews", async function () {
+    const reviews = await owner.getReviews();
+    const item2023 = reviews.find((item) => item.dataValues.year === 2023);
+    const average = item2023.dataValues.averagePoints;
+    result = parseFloat(average);
+    assert.strictEqual(result, 4.0);
+  });
+
+  it("owner gives raise to not existing employee", async function () {
+    try {
+      await owner.giveRaise(5);
+      assert.fail("Expected an error to be thrown");
+    } catch (err) {
+      assert.strictEqual(err.message, "Employee not found");
+    }
+  });
+  it("owner gives raise with a wrong percentage value", async function () {
+    try {
+      await owner.giveRaise(4, -3);
+      assert.fail("Expected an error to be thrown");
+    } catch (err) {
+      assert.strictEqual(
+        err.message,
+        "Percentage increase must be a positive integer between 1 and 20"
+      );
+    }
+  });
+
+  it("owner gives raise with a wrong percentage value", async function () {
+    try {
+      await owner.giveRaise(4, 25);
+      assert.fail("Expected an error to be thrown");
+    } catch (err) {
+      assert.strictEqual(
+        err.message,
+        "Percentage increase must be a positive integer between 1 and 20"
+      );
+    }
+  });
+  it("owner gives raise to employee", async function () {
+    await owner.giveRaise(2, 10);
+
+    const empObj = await db.employee.findByPk(2);
+    result = empObj.salary;
+    assert.strictEqual(result, 2200.0);
+  });
+
+  it("owner updates employee data", async function () {
+    await owner.updateEmployeeInformation({
+      employeeId: 1,
+      firstName: "Gianluca",
+      lastName: "Mariani",
+      email: "updateEmail@oerlikon.com",
+      phoneNo: "3342432423",
+    });
+
+    const userObj = await db.user.findByPk(2);
+    result = userObj.firstName;
+    assert.strictEqual(result, "Gianluca");
+  });
+
+  it("owner gets most ordered menu items", async function () {
+    const mostOrderedItems = await owner.showMostOrderedMenuItems();
+
+    result = mostOrderedItems[0].menuItemId;
+    assert.strictEqual(result, 7);
+  });
+
+  it("check if menu item is available (true)", async function () {
+    const menuItem = await db.menuItem.findByPk(2);
+
+    result = await menuItem.checkIfAvailable();
+    assert.strictEqual(result, true);
+  });
+
+  it("check if menu item is available (false)", async function () {
+    this.timeout(100000);
+    try {
+      await db.inventory.update(
+        {
+          quantity: 1,
+        },
+        {
+          where: {
+            id: 12,
+          },
+        }
+      );
+      const reservation = await customer.makeReservation({
+        noOfPeople: 4,
+        date: moment("24.04.2023", "DD.MM.yyyy").format("YYYY-MM-DD"),
+        comment: "TestinComment",
+        slotId: 1,
+        tableId: 1,
+        menuItems: [
+          {
+            menuItemId: 2,
+            quantity: 2,
+          },
+        ],
+      });
+    } catch (err) {
+      assert.strictEqual(
+        err.message,
+        "This item is not available! Not enough inventory"
+      );
+    }
+  });
+
+  it("waiter deletes order item", async function () {
+    this.timeout(100000);
+
+    const reservation = await customer.makeReservation({
+      noOfPeople: 4,
+      date: moment("29.04.2023", "DD.MM.yyyy").format("YYYY-MM-DD"),
+      comment: "TestinComment",
+      slotId: 1,
+      tableId: 1,
+      menuItems: [
+        {
+          menuItemId: 1,
+          quantity: 2,
+        },
+        {
+          menuItemId: 7,
+          quantity: 1,
+        },
+      ],
+    });
+
+    await waiter.confirmReservation(4);
+    await waiter.removeItemFromOrder(8);
+    const orderObj = await db.order.findByPk(6);
+    result = orderObj.totalAmount;
+    assert.strictEqual(result, 22);
+  });
 });

@@ -56,6 +56,7 @@ module.exports = (sequelize, Sequelize) => {
       return this.getOnsiteOrder();
     }
   };
+
   // Checks whatever each of the assigned orderItems has status 'SERVED' or 'CANCELED'
   // If the above condition is true, then the status of the order changes to 'COMPLETED'
 

@@ -74,6 +74,13 @@ module.exports = (
 
     if (orderItemObj.status === "NEW") {
       orderItemObj.status = "CANCELED";
+      const orderObj = await orderItemObj.getOrder();
+      const menuItem = await orderItemObj.getMenuItem();
+      const newTotalAmount = parseFloat(
+        orderObj.totalAmount - orderItemObj.quantity * menuItem.price
+      );
+      orderObj.totalAmount = newTotalAmount;
+      await orderObj.save();
       await orderItemObj.save();
     } else {
       throw Error("Order item cannot be deleted, status must be 'NEW'");
